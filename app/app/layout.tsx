@@ -50,7 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           media="(prefers-color-scheme: dark)"
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>{children}</LanguageProvider>
         </ThemeProvider>
