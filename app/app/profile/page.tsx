@@ -2,11 +2,11 @@
 
 import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+
 import { PERSONAS, type PersonaId } from "@/lib/brand";
 import { PERSONA_FIELDS, RESUME_PERSONAS } from "@/lib/persona";
 import { useI18n } from "@/lib/i18n";
-import AuthHeader from "../components/auth-header";
+import SiteHeader from "../components/site-header";
 import DictationButton from "../components/dictation-button";
 
 type Profile = {
@@ -178,16 +178,7 @@ export default function ProfilePage() {
   return (
     <main className="min-h-dvh px-4 py-10" style={{ background: "var(--bg)", color: "var(--text)" }}>
       <div className="mx-auto max-w-2xl">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/workspace"
-            className="inline-flex min-h-11 items-center gap-2 rounded px-2 text-sm transition hover:opacity-80"
-            style={{ color: "var(--accent)" }}
-          >
-            <span aria-hidden>←</span> {t("Back to search", "खोज पर वापस")}
-          </Link>
-          <AuthHeader />
-        </div>
+        <SiteHeader />
         <h1 className="font-mono text-2xl tracking-tight" style={{ color: "var(--text)" }}>
           {t("Your profile", "आपकी प्रोफ़ाइल")}
         </h1>

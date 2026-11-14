@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PERSONAS } from "@/lib/brand";
 import { useI18n } from "@/lib/i18n";
-import AuthHeader from "../components/auth-header";
+import SiteHeader from "../components/site-header";
 import VoiceSession from "../components/voice-session";
 
 type Interpreted = {
@@ -221,22 +221,20 @@ export default function Workspace() {
         onSearch={(p) => void runQuery(p)}
       />
       {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="mono mt-2 text-2xl font-bold leading-tight sm:text-4xl" style={{ color: "var(--text)" }}>
-              {greeting}
-            </h1>
-            {personaLabel && (
-              <p
-                className="mono mt-2 inline-flex items-center rounded px-2 py-1 text-xs tracking-widest uppercase"
-                style={{ border: "1px solid var(--accent-dim)", color: "var(--accent)" }}
-              >
-                {personaLabel}
-              </p>
-            )}
-          </div>
-          <AuthHeader />
+      <SiteHeader />
+      <div className="mb-8">
+        <div>
+          <h1 className="mono text-2xl font-bold leading-tight sm:text-4xl" style={{ color: "var(--text)" }}>
+            {greeting}
+          </h1>
+          {personaLabel && (
+            <p
+              className="mono mt-2 inline-flex items-center rounded px-2 py-1 text-xs tracking-widest uppercase"
+              style={{ border: "1px solid var(--accent-dim)", color: "var(--accent)" }}
+            >
+              {personaLabel}
+            </p>
+          )}
         </div>
         <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: "var(--muted)" }}>
           {t(
@@ -244,7 +242,7 @@ export default function Workspace() {
             "अंग्रेज़ी, हिंदी या हिंग्लिश में प्रश्न लिखें या बोलें - नौकरियां, प्रॉपर्टी, टेंडर या इवेंट्स। हर नतीजा सत्यापित, क्लिक करने योग्य स्रोत के साथ।"
           )}
         </p>
-      </header>
+      </div>
 
       {/* Prompt card */}
       <section className="card p-4 shadow-[var(--shadow-2)] sm:p-6" aria-labelledby="ask-heading">
