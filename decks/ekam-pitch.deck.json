@@ -5,7 +5,7 @@
     "background": "#070a1a",
     "surface": "#10152e",
     "text": "#f2f4ff",
-    "muted": "#aab2d5",
+    "muted": "#c3c9e8",
     "accent": "#7c5cff",
     "accent2": "#19d3c5",
     "font": "Inter",
@@ -29,16 +29,17 @@
       "notes": "Anchor the pain: nothing here is a data-availability problem, it is a trust and fragmentation problem. A student in Meerut and a founder in Coimbatore ask the same question in different words and both end up with noise."
     },
     {
-      "layout": "metric",
-      "kicker": "Why it hurts",
-      "title": "Stale, fake and duplicated listings are the norm",
+      "layout": "stats",
+      "title": "Broken search is the norm",
       "stats": [
-        { "value": "4 paths", "label": "of users hit the same broken search" },
-        { "value": "2 languages", "label": "most sites serve only one" },
-        { "value": "0 sources", "label": "shown on a typical listing" }
+        { "value": "4 paths", "label": "of users, same broken search" },
+        { "value": "2 languages", "label": "most sites serve one" },
+        { "value": "0 sources", "label": "shown on a listing" }
       ],
-      "body": "Problem framing, not product metrics.",
-      "notes": "Be explicit with judges: these are problem descriptors, not traction numbers. The point is that duplication, staleness and missing provenance are structural, and no vertical-specific job board fixes them."
+      "sources": [
+        { "title": "ekam product plan, sranswal/ekam", "url": "https://github.com/sranswal/ekam" }
+      ],
+      "notes": "Be explicit with judges: these are problem descriptors, not traction numbers - duplication, staleness and missing provenance are structural problems no vertical job board fixes."
     },
     {
       "layout": "statement",
@@ -92,17 +93,10 @@
       "notes": "Four product principles that separate ekam from a vertical job board. Voice is not a dictation toy - it is the primary interface for users whose first language is not English."
     },
     {
-      "layout": "split",
-      "title": "Ask it the way you'd say it",
-      "body": "\"mujhe Noida mein flat dikhao\" and \"AI developer jobs in Bengaluru\" both land in the same pipeline - intent, vertical and location extracted from one sentence.",
-      "bullets": [
-        "Gemini interprets; regex fallback keeps it alive",
-        "Location in the question sets the search",
-        "Every answer shows its source and timestamp"
-      ],
-      "image": "app/public/ekam_logo.png",
-      "imageSide": "right",
-      "notes": "Demo moment: show the wordmark, then ideally switch to the live workspace. Point out that the ask bar accepts typed and spoken Hinglish queries and the pipeline lights up interpret, fetch, verify in real time."
+      "layout": "quote",
+      "quote": "mujhe Noida mein flat dikhao",
+      "author": "One sentence in, one verified, source-linked answer out - the same pipeline handles \"AI developer jobs in Bengaluru\". Intent, vertical and location from a single line, with Gemini plus a regex fallback.",
+      "notes": "Demo moment: ideally switch to the live workspace here. The ask bar accepts typed and spoken Hinglish queries and the pipeline lights up interpret, fetch, verify in real time."
     },
     {
       "layout": "table",
@@ -130,6 +124,9 @@
         { "value": "100%", "label": "of results carry a source link" }
       ],
       "body": "Hackathon-stage status - shipped capabilities, not user numbers. Adoption targets come after launch.",
+      "sources": [
+        { "title": "ekam README, shipped capabilities", "url": "https://github.com/sranswal/ekam" }
+      ],
       "notes": "Be honest with judges: these are shipped-product facts, deliberately not vanity metrics. Everything on this slide exists in the deployed preview today; targets and traction numbers are post-launch conversations."
     },
     {
