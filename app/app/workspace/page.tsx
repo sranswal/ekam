@@ -31,7 +31,6 @@ type Query = {
   error: string | null;
   createdAt: string;
 };
-type Event = { id: number; stage: string; status: string; detail: string | null; durationMs: number | null };
 type AuthUser = { id: number; name: string; persona: string | null; onboardedAt: string | null };
 type Listing = {
   id: number;
@@ -45,7 +44,6 @@ type Listing = {
   publicationDate: string | null;
 };
 
-const STAGES = ["interpret", "plan", "collect", "validate", "done"] as const;
 const DEFAULT_EXAMPLES = [
   "AI developer jobs in Bengaluru",
   "मुझे Noida में flat दिखाओ",
@@ -82,7 +80,6 @@ export default function Workspace() {
   const [prompt, setPrompt] = useState("");
   const [running, setRunning] = useState(false);
   const [query, setQuery] = useState<Query | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
   const [rows, setRows] = useState<Listing[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -155,12 +152,6 @@ export default function Workspace() {
     };
   }, []);
 
-  const stageState = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const e of events) map.set(e.stage, e.status);
-    return map;
-  }, [events]);
-
   const cityOptions = useMemo(
     () => Array.from(new Set(rows.map((r) => (r.location ?? "").trim()).filter(Boolean))).sort(),
     [rows],
@@ -191,7 +182,6 @@ export default function Workspace() {
     setRunning(true);
     setError(null);
     setQuery(null);
-    setEvents([]);
     setRows([]);
     setSearch("");
     setCity("");
@@ -208,8 +198,7 @@ export default function Workspace() {
       pollRef.current = window.setInterval(async () => {
         const r = await fetch(`/api/queries/${data.id}`);
         if (!r.ok) return;
-        const d = (await r.json()) as { query: Query; events: Event[]; listings: Listing[] };
-        setEvents(d.events);
+        const d = (await r.json()) as { query: Query; listings: Listing[] };
         setQuery(d.query);
         setRows(d.listings);
         if (d.query.status !== "running") {
@@ -221,23 +210,6 @@ export default function Workspace() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "something went wrong");
       setRunning(false);
-    }
-  }
-
-  function stageLabel(stage: string) {
-    switch (stage) {
-      case "interpret":
-        return t("Interpret prompt", "प्रश्न समझें");
-      case "plan":
-        return t("Plan collection", "योजना बनाएं");
-      case "collect":
-        return t("Collect from sources", "स्रोतों से इकट्ठा");
-      case "validate":
-        return t("Validate & dedupe", "सत्यापित करें");
-      case "done":
-        return t("Store & serve", "सहेजें और दें");
-      default:
-        return stage;
     }
   }
 
@@ -268,8 +240,8 @@ export default function Workspace() {
         </div>
         <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: "var(--muted)" }}>
           {t(
-            "Type or speak a question in English, Hindi or Hinglish - jobs, properties, tenders or events. Watch the pipeline interpret, collect, validate and return every row with a clickable source - no scraping, no black box.",
-            "अंग्रेज़ी, हिंदी या हिंग्लिश में प्रश्न लिखें या बोलें - नौकरियां, प्रॉपर्टी, टेंडर या इवेंट्स। पाइपलाइन को हर स्रोत के साथ सत्यापित परिणाम देते देखें।"
+            "Type or speak a question in English, Hindi or Hinglish - jobs, properties, tenders or events. Every result is verified, with a clickable source.",
+            "अंग्रेज़ी, हिंदी या हिंग्लिश में प्रश्न लिखें या बोलें - नौकरियां, प्रॉपर्टी, टेंडर या इवेंट्स। हर नतीजा सत्यापित, क्लिक करने योग्य स्रोत के साथ।"
           )}
         </p>
       </header>
@@ -277,7 +249,7 @@ export default function Workspace() {
       {/* Prompt card */}
       <section className="card p-4 shadow-[var(--shadow-2)] sm:p-6" aria-labelledby="ask-heading">
         <h2 id="ask-heading" className="text-sm font-semibold" style={{ color: "var(--text)" }}>
-          {t("Natural language query to structured intelligence", "साधारण भाषा से संरचित इंटेलिजेंस तक")}
+          {t("What are you looking for?", "आप क्या खोज रहे हैं?")}
         </h2>
         <form
           className="mt-3 flex flex-col gap-3 sm:flex-row"
@@ -335,77 +307,13 @@ export default function Workspace() {
         </div>
       </section>
 
-      {/* Stage tracker */}
-      {(running || events.length > 0) && (
-        <section className="mt-6" aria-label="Pipeline stages">
-          <ol className="grid gap-2 sm:grid-cols-5">
-            {STAGES.map((stage) => {
-              const st = stageState.get(stage);
-              const active = st === "running";
-              const ok = st === "ok";
-              return (
-                <li
-                  key={stage}
-                  className={`stage-chip ${ok ? "stage-chip-ok" : active ? "stage-chip-active" : "stage-chip-idle"}`}
-                >
-                  <span aria-hidden className="text-[10px]">
-                    {ok ? "✓" : active ? "●" : "·"}
-                  </span>
-                  {stageLabel(stage)}
-                </li>
-              );
-            })}
-          </ol>
-          {events
-            .filter((e) => e.detail)
-            .map((e) => (
-              <p key={e.id} className="mono mt-2 text-xs" style={{ color: e.status === "error" ? "var(--danger)" : "var(--muted)" }}>
-                <span style={{ color: "var(--accent)" }}>{stageLabel(e.stage)}</span>
-                {" · "}
-                {e.detail}
-                {e.durationMs ? ` (${e.durationMs}ms)` : ""}
-              </p>
-            ))}
-          {query?.interpreted && (
-            <div
-              className="mt-3 rounded p-3"
-              style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
-            >
-              <p className="mono text-xs" style={{ color: "var(--muted)" }}>
-                Interpreted as: <span style={{ color: "var(--text)" }}>{query.interpreted.topic}</span>
-                {" · "}
-                <span
-                  className="rounded px-1.5 py-0.5"
-                  style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
-                >
-                  {query.interpreted.vertical}
-                </span>
-                {" · "}
-                <span
-                  className="rounded px-1.5 py-0.5"
-                  style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
-                >
-                  {query.interpreted.originalLanguage}
-                </span>
-                {" · "}
-                {query.interpreted.source === "gemini" ? "Gemini" : "fallback rules"}
-              </p>
-              {query.interpreted.hindiTranslation && (
-                <p className="mt-1.5 text-sm" lang="hi">
-                  <span className="mono text-xs" style={{ color: "var(--muted)" }}>हिंदी में: </span>
-                  {query.interpreted.hindiTranslation}
-                </p>
-              )}
-              {query.interpreted.translatedPrompt && (
-                <p className="mono mt-1 text-xs" style={{ color: "var(--muted)" }}>
-                  English: {query.interpreted.translatedPrompt}
-                </p>
-              )}
-              <p className="mono mt-1 text-xs" style={{ color: "var(--muted)" }}>
-                Search keywords: {query.interpreted.keywords.join(", ")}
-                {query.interpreted.recencyDays ? ` · last ${query.interpreted.recencyDays} days` : ""}
-              </p>
-            </div>
+      {/* Search status */}
+      {(running || (query && query.status !== "running") || error) && (
+        <section className="mt-6" aria-label="Search status">
+          {running && (
+            <p className="mono text-xs" style={{ color: "var(--muted)" }}>
+              {t("Searching verified sources…", "सत्यापित स्रोतों में खोज रहा है…")}
+            </p>
           )}
           {error && (
             <p className="mono mt-2 text-xs" style={{ color: "var(--danger)" }}>
@@ -419,8 +327,8 @@ export default function Workspace() {
       {query && query.status !== "running" && (
         <section className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Dataset stats">
           {[
-            ["Collected", query.collected],
-            ["Verified rows", query.kept],
+            ["Results found", query.collected],
+            ["Verified", query.kept],
             ["Duplicates removed", query.duplicates],
             ["Flagged incomplete", query.flagged],
           ].map(([label, value]) => (
@@ -569,9 +477,8 @@ export default function Workspace() {
                     setPrompt(h.prompt);
                     fetch(`/api/queries/${h.id}`)
                       .then((r) => r.json())
-                      .then((d: { query: Query; events: Event[]; listings: Listing[] }) => {
+                      .then((d: { query: Query; listings: Listing[] }) => {
                         setQuery(d.query);
-                        setEvents(d.events);
                         setRows(d.listings);
                       });
                   }}
@@ -600,7 +507,7 @@ export default function Workspace() {
       )}
 
       <footer className="mono mt-12 border-t pt-4 text-xs" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
-        ekam · prompt → dataset → dashboard → CSV · data via Remotive&apos;s permissioned public API
+        ekam · every result verified, with a clickable source
       </footer>
     </main>
   );
