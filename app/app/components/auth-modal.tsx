@@ -3,7 +3,6 @@
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
-import { PERSONAS } from "@/lib/brand";
 
 type User = { id: number; email: string; name: string; persona: string | null; onboardedAt: string | null };
 
@@ -24,7 +23,6 @@ export default function AuthModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [persona, setPersona] = useState<string | null>(null);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -59,7 +57,7 @@ export default function AuthModal({
           name: mode === "signup" ? name.trim() : undefined,
           email: email.trim(),
           password,
-          persona: mode === "signup" && persona ? persona : undefined,
+          persona: undefined,
         }),
       });
       const data = (await res.json()) as { user?: User; error?: string };
@@ -187,42 +185,6 @@ export default function AuthModal({
                 <span className="mt-1 block text-xs">{t("At least 8 characters.", "कम से कम 8 अक्षर।")}</span>
               )}
             </label>
-
-            {mode === "signup" && (
-              <fieldset>
-                <legend className="text-sm text-[var(--muted)]">
-                  {t("What brings you to ekam?", "आप ekam पर क्यों आए?")}{" "}
-                  <span className="text-xs">({t("optional", "वैकल्पिक")})</span>
-                </legend>
-                <div className="mt-2 grid gap-2">
-                  {PERSONAS.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={persona === p.id}
-                      onClick={() => setPersona(persona === p.id ? null : p.id)}
-                      className={`flex items-center justify-between rounded-[var(--radius)] border px-3 py-2 text-left text-sm transition-colors ${
-                        persona === p.id
-                          ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--text)]"
-                          : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)]"
-                      }`}
-                    >
-                      <span>
-                        <span className="font-medium text-[var(--text)]">{t(p.label, p.hi)}</span>
-                        <span className="ms-2 text-xs">{t(p.blurb, p.blurb)}</span>
-                      </span>
-                      <span
-                        aria-hidden
-                        className={`size-3.5 shrink-0 rounded-full border ${
-                          persona === p.id ? "border-[var(--accent)] bg-[var(--accent)]" : "border-[var(--muted)]"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-            )}
 
             {error && (
               <p
