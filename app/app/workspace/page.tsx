@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PERSONAS } from "@/lib/brand";
 import { useI18n } from "@/lib/i18n";
 import AuthHeader from "../components/auth-header";
+import VoiceSession from "../components/voice-session";
 
 type Interpreted = {
   topic: string;
@@ -89,7 +90,7 @@ export default function Workspace() {
   const [city, setCity] = useState("");
   const [maxAgeDays, setMaxAgeDays] = useState("");
   const [history, setHistory] = useState<Query[]>([]);
-  const [speaking, setSpeaking] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const pollRef = useRef<number | null>(null);
 
   const loadHistory = useCallback(async () => {
@@ -223,31 +224,6 @@ export default function Workspace() {
     }
   }
 
-  function speak() {
-    const SR =
-      (window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
-        .SpeechRecognition ??
-      (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition;
-    if (!SR) {
-      setError("Voice input is not supported in this browser - type your question instead.");
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rec = new (SR as any)();
-    rec.lang = "en-IN";
-    rec.interimResults = false;
-    rec.onresult = (e: { results: { 0: { 0: { transcript: string } } } }) => {
-      setSpeaking(false);
-      const text = e.results[0][0].transcript;
-      setPrompt(text);
-      runQuery(text);
-    };
-    rec.onerror = () => setSpeaking(false);
-    rec.onend = () => setSpeaking(false);
-    setSpeaking(true);
-    rec.start();
-  }
-
   function stageLabel(stage: string) {
     switch (stage) {
       case "interpret":
@@ -267,6 +243,20 @@ export default function Workspace() {
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+      {voiceOpen && (
+        <div
+          role="dialog"
+          aria-label="Voice conversation"
+          style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(0,0,0,0.5)", padding: 16 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setVoiceOpen(false);
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: 480, marginBottom: 24 }}>
+            <VoiceSession onClose={() => setVoiceOpen(false)} />
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="mb-8">
         <div className="flex items-start justify-between gap-4">
@@ -326,12 +316,11 @@ export default function Workspace() {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={speak}
+              onClick={() => setVoiceOpen(true)}
               disabled={running}
               className="btn-secondary flex min-h-[44px] items-center rounded-full px-4 text-sm font-medium disabled:opacity-50"
-              style={{ color: speaking ? "var(--accent)" : "var(--text)" }}
             >
-              {speaking ? t("● Listening…", "● सुन रहे हैं…") : t("◉ Speak", "◉ बोलें")}
+              {t("◉ Talk to ekam", "◉ ekam से बात करें")}
             </button>
             <button
               type="submit"

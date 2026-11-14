@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "test": "node --import tsx --test lib/pipeline.test.ts",
+    "test": "node --import tsx --test lib/pipeline.test.ts lib/voice-agent.test.ts",
     "build": "next build",
     "start": "next start"
   },
