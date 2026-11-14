@@ -1,23 +1,62 @@
-UI prompt (paste into Speech / your design tool)
+# ekam - UI inventory for the designer
 
-Redesign the web UI of "ekam", a verified-opportunity finder where people ask in plain words (typed or spoken, English or Hindi) and get verified, source-linked answers.
+This file only describes what ekam is and what UI currently exists (screens, pages, buttons, controls). Design decisions are entirely up to you.
 
-Brand:
-- Name is always lowercase "ekam" (never "Ekam"). Tagline: "all in one" (Hindi: "सब एक जगह").
-- Feel: calm, credible, modern Indian consumer product - not a hackathon demo, not a dashboard.
-- Palette: warm off-white background (#faf9f6), deep ink text (#141414), one confident accent (saffron-amber #f59e0b or a deep teal #0d9488 - pick one and stick to it), plus a soft neutral gray scale. In dark mode: near-black (#0b0b10) surfaces with the same accent.
-- Typography: one friendly geometric sans (Bricolage Grotesque or Plus Jakarta Sans) for everything; tight, generous letter spacing on headings. The lowercase wordmark is a visual anchor - use it large on the landing page.
-- Voice: short, plain, human copy. Hinglish examples welcome ("mujhe Noida mein flat dikhao"). No corporate filler.
+## What ekam is
 
-Layout and screens (Next.js app, desktop + mobile):
-1. Landing page: sticky minimal header (wordmark left; EN/HI toggle, theme toggle, and one "Get Started" button right - no separate Login/Signup buttons). Hero = the ask bar front and center with a playful animated demo beneath it (query types itself, pipeline chips "interpret → fetch → verify" light up, mock verified results appear - it is a demo, no API). Below: "four kinds of people" section (job seeker, student, SME/founder, agency) as icon cards, then footer.
-2. Auth overlay: sign in / sign up as a single centered modal dialog with tabs, over the landing page with a dimmed backdrop. Closes with the X button, clicking the backdrop, or Escape. Inline validation, warm microcopy.
-3. Onboarding: one full-screen question - "what will you use ekam for?" - four large tappable cards with icons; selected state is clear; a single "continue" button.
-4. Workspace: slim top bar (wordmark, history icon, profile), the ask bar big at the top with a mic button (voice input), and the pipeline visible as the answer builds: interpret → fetch → verify with subtle motion. Results are cards with title, one-line summary, source badge linking to the origin, and a freshness indicator. Export buttons (CSV, JSON) near the top of results. Empty state encourages the first question; loading state never lies about what is happening.
-5. History / profile drawer: list of past unique queries, grouped by day; tap to re-run.
+ekam is a verified-opportunity finder. A person types (or speaks) a question in plain English, Hindi or Hinglish - "AI developer jobs in Bengaluru", "mujhe Noida mein flat dikhao" - and the app runs it through a visible pipeline (interpret, plan, collect, validate), then returns result rows that each link to their original source. Rows with missing fields are flagged "incomplete" rather than hidden. Every query is stored, so users can re-run past questions. The whole product is bilingual (English / Hindi) with a language toggle, and has light and dark themes.
 
-Interaction and quality bar:
-- Motion is calm and purposeful: 150-250ms eases, staggered card entrances, the pipeline dots pulse while a stage runs. Respect prefers-reduced-motion (show finished states instead of animations).
-- Fully responsive; the phone layout is the primary one (390px). Touch targets at least 44px. Keyboard accessible: visible focus rings, Escape closes overlays, tab order is logical.
-- Empty, loading, error and success states designed for every screen - never a blank box.
-- WCAG 2.2 AA contrast in both themes.
+## Screens and pages (Next.js app, desktop + mobile, phone is primary)
+
+### Landing page (/)
+
+- Sticky header: logo/wordmark on the left; on the right an EN/हिंदी language switch (pill toggle), a theme toggle (sun/moon icon button), and either a "Get Started" button (logged out) or a "Go to workspace" link (logged in).
+- Hero: the ask bar front and centre, plus a self-playing demo - a sample query types itself, pipeline stage chips light up in order, and mock verified results appear. It is a demo with no API behind it.
+- Persona section: four cards (job seeker, student, SME/founder, agency) with icons and short descriptions.
+- "Why verified" section: four rows - source-linked, fresh by default, duplicates removed, flagged not hidden.
+- CTA band: heading plus a Get Started / Go to workspace button.
+- Footer: copyright line and a GitHub link.
+- Auth overlay opens over this page (see below), including via deep links ?auth=open and ?auth=signup.
+
+### Auth overlay (modal over landing)
+
+- Single centered modal with tabs: sign in / sign up.
+- Fields: name (sign up only), email, password. Inline validation messages.
+- Closes via an X button, clicking the dimmed backdrop, or Escape.
+
+### Login route (/login)
+
+- Minimal redirect page that forwards to the landing page with the auth overlay open.
+
+### Onboarding (/onboarding)
+
+- One full-screen question: "what will you use ekam for?".
+- Four large tappable persona cards (same four personas) with icons and a clear selected state.
+- A single "continue" button; requires a choice.
+
+### Workspace (/workspace) - the main app screen
+
+- Slim top bar: wordmark, signed-in user identity, sign-out.
+- The ask bar: large text input with a mic button (browser voice input; shows a graceful message when unsupported), an example-chips row (examples differ by persona), and a submit button.
+- Pipeline status area: as a query runs, stage events (interpret, plan, collect, validate) stream in live with statuses and durations; errors are shown per stage.
+- Interpretation panel: what the system understood - topic, role, location, keywords, detected language, translation if the input was Hindi/Hinglish, recency window.
+- Filters row: free-text search over results, city filter, max-age (days) filter, "only complete" toggle.
+- Stats band: collected / kept / duplicates / flagged counts.
+- Results list: cards with title, company, location, tag chips, an "incomplete" badge where relevant, and a "source" link opening the original page in a new tab.
+- Export: CSV and JSON download buttons for the current query.
+- History section: list of past queries with their prompt, language badge and outcome ("✓ N rows" or "✗ error"); tapping one re-loads its full result.
+- Empty, loading and error states exist for each of these.
+- Footer line: "ekam · prompt → dataset → dashboard → CSV · data via permissioned public API".
+
+### Profile (/profile)
+
+- Account page: name, email, persona; lets the user update name and persona, and re-run onboarding.
+
+## Element inventory
+
+- Buttons: primary pill buttons (Get Started, continue, submit), icon buttons (theme, mic, X), tab switches (auth, EN/हिंदी), filter toggles, export buttons, history row buttons, sign-out.
+- Inputs: text ask bar, email/password/name fields, filter fields (search, city, max age).
+- Cards: persona cards, result cards, example chips.
+- Lists: pipeline event feed, results list, history list.
+- Badges/chips: tags, "incomplete", language badge, pipeline stage chips.
+- States to design: empty, loading (streaming pipeline), per-stage error, global error, success, disabled.
