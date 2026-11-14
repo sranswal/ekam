@@ -1,42 +1,77 @@
 @import "tailwindcss";
 
 /*
- * ekam design tokens - monochrome ink, from the light-mode brand reference.
- * One accent (ink itself), calm neutrals, two radii, two shadow levels.
- * Light is the default; .dark on <html> inverts the same scale.
+ * ekam design tokens - from the Stitch design system (ekam_design_system/DESIGN.md).
+ * Dual identity: uncompromising technical precision + warm humanist editorial credibility.
+ * Electric indigo on blue-tinted surfaces. Light is the default; .dark on <html> inverts the same scale.
  */
 :root {
-  --bg: #f7f7f5;
+  /* Surfaces */
+  --bg: #f8f9ff;
   --surface: #ffffff;
-  --surface-2: #efefec;
-  --border: #e1e1dd;
-  --text: #16181b;
-  --muted: #5c6066;
-  --accent: #16181b;
+  --surface-2: #eff4ff;
+  --surface-3: #e5eeff;
+  --border: #c7c4d8;
+  --border-soft: #e2e8f0;
+
+  /* Ink */
+  --text: #0b1c30;
+  --muted: #464555;
+  --faint: #64748b;
+
+  /* Accent - electric indigo */
+  --accent: #4f46e5;
+  --accent-strong: #3525cd;
+  --accent-hover: #4338ca;
   --accent-contrast: #ffffff;
-  --accent-dim: rgba(22, 24, 27, 0.06);
-  --danger: #b3261e;
+  --accent-dim: rgba(79, 70, 229, 0.08);
+  --accent-fixed: #e2dfff;
+  --on-accent-fixed: #0f0069;
+
+  /* Status */
+  --success: #10b981;
+  --success-dim: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --warning-dim: rgba(245, 158, 11, 0.1);
+  --danger: #ba1a1a;
   --danger-dim: rgba(179, 38, 30, 0.08);
-  --radius: 6px;
-  --radius-lg: 12px;
-  --shadow-1: 0 1px 2px rgba(22, 24, 27, 0.06);
-  --shadow-2: 0 12px 32px rgba(22, 24, 27, 0.1);
+
+  /* Shape - pill for interactive, soft hulls for data */
+  --radius: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 24px 48px -12px rgba(15, 23, 42, 0.25);
 }
 
 .dark {
-  --bg: #101113;
-  --surface: #191a1d;
-  --surface-2: #212327;
-  --border: #2e3036;
-  --text: #f1f1ef;
-  --muted: #9ba0a8;
-  --accent: #f1f1ef;
-  --accent-contrast: #101113;
-  --accent-dim: rgba(241, 241, 239, 0.08);
+  --bg: #0b1c30;
+  --surface: #12233a;
+  --surface-2: #16293f;
+  --surface-3: #1b3049;
+  --border: #2c415c;
+  --border-soft: #1e3248;
+
+  --text: #eaf1ff;
+  --muted: #a8b3c9;
+  --faint: #8494ad;
+
+  --accent: #8b85ff;
+  --accent-strong: #a5a0ff;
+  --accent-hover: #a09bff;
+  --accent-contrast: #0f0069;
+  --accent-dim: rgba(139, 133, 255, 0.12);
+  --accent-fixed: #213145;
+  --on-accent-fixed: #c3c0ff;
+
+  --success: #34d399;
+  --success-dim: rgba(52, 211, 153, 0.14);
+  --warning: #fbbf24;
+  --warning-dim: rgba(251, 191, 36, 0.14);
   --danger: #f2b8b5;
   --danger-dim: rgba(242, 184, 181, 0.1);
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-2: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --shadow-2: 0 24px 48px -12px rgba(0, 0, 0, 0.55);
   --logo-filter: invert(1);
 }
 
@@ -55,31 +90,131 @@ html.dark {
 }
 
 body {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.55;
 }
 
+/* Display type - Plus Jakarta Sans, the Stitch headline face */
+.display {
+  font-family: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
 .mono {
-  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
 }
 
 .btn-primary {
   background: var(--accent);
   color: var(--accent-contrast);
-  transition: opacity 150ms ease-out;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
 
 .btn-primary:hover {
-  opacity: 0.88;
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 4px var(--accent-dim);
 }
 
 .btn-primary:active {
-  opacity: 0.76;
+  transform: scale(0.98);
 }
 
 .btn-primary:disabled {
   opacity: 0.5;
+  pointer-events: none;
+}
+
+.btn-secondary {
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: transparent;
+  transition: background 150ms ease-out;
+}
+
+.btn-secondary:hover {
+  background: var(--surface-2);
+}
+
+/* Cards - soft structural hulls */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+}
+
+/* Verified / flagged badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.badge-verified {
+  background: var(--success-dim);
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+.badge-flagged {
+  background: var(--warning-dim);
+  border: 1px solid var(--warning);
+  color: var(--warning);
+}
+
+/* Pipeline stage chips - pill geometry with live states */
+.stage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.stage-chip-active {
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  animation: stage-pulse 1.6s ease-in-out infinite;
+}
+
+.stage-chip-ok {
+  border: 1px solid var(--success);
+  background: var(--success-dim);
+  color: var(--success);
+}
+
+.stage-chip-idle {
+  border: 1px solid var(--border-soft);
+  color: var(--faint);
+}
+
+@keyframes stage-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--accent-dim);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--accent-dim);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-chip-active {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

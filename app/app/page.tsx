@@ -130,36 +130,61 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {/* Hero */}
-        <section className="mx-auto max-w-5xl px-5 pb-20 pt-16 sm:pb-28 sm:pt-24">
-          <p className="overline fade-up fade-up-1 mono">{t("One question. Every source.", "एक सवाल। हर स्रोत।")}</p>
-          <h1 className="display fade-up fade-up-2 mt-4 max-w-3xl text-4xl sm:text-6xl">
-            {t("all in one", "सब एक जगह।")}
-          </h1>
-          <p className="fade-up fade-up-3 mt-6 max-w-2xl text-lg text-[var(--muted)]">
-            {t(
-              "ekam turns a plain-language question - in English or Hindi - into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
-              "ekam आपके साधारण सवाल - अंग्रेज़ी या हिंदी में - को सत्यापित, स्रोत-लिंक्ड डेटासेट में बदलता है: नौकरियां, प्रॉपर्टी, टेंडर, इवेंट और भी बहुत कुछ।",
-            )}
-          </p>
+      {/* Hero */}
+      <section className="mx-auto max-w-5xl px-5 pb-20 pt-16 sm:pb-28 sm:pt-24">
+        <div className="fade-up fade-up-1 flex justify-center">
+          <span
+            className="mono inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs"
+            style={{
+              borderColor: "var(--accent-fixed)",
+              background: "var(--accent-dim)",
+              color: "var(--accent)",
+            }}
+          >
+            <span aria-hidden className="size-1.5 rounded-full" style={{ background: "var(--success)" }} />
+            {t("ekam v1 · live engine", "ekam v1 · लाइव इंजन")}
+            <span aria-hidden className="text-[var(--faint)]">·</span>
+            {t("single source of truth", "एक ही स्रोत")}
+          </span>
+        </div>
+        <h1 className="display fade-up fade-up-2 mt-6 max-w-4xl text-center text-4xl sm:text-6xl">
+          {lang === "en" ? (
+            <>
+              One question. <span style={{ color: "var(--accent)" }}>Every source.</span>
+            </>
+          ) : (
+            <>
+              एक सवाल। <span style={{ color: "var(--accent)" }}>हर स्रोत।</span>
+            </>
+          )}
+        </h1>
+        <p className="fade-up fade-up-3 mx-auto mt-6 max-w-2xl text-center text-lg text-[var(--muted)]">
+          {t(
+            "ekam turns a plain-language question - in English or Hindi - into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
+            "ekam आपके साधारण सवाल - अंग्रेज़ी या हिंदी में - को सत्यापित, स्रोत-लिंक्ड डेटासेट में बदलता है: नौकरियां, प्रॉपर्टी, टेंडर, इवेंट और भी बहुत कुछ।",
+          )}
+        </p>
 
-          {/* Ask-bar demo: animated typing + staged pipeline + mock verified rows */}
-          <div className="fade-up fade-up-4 mt-10 max-w-2xl">
-            <DemoSearch />
-            <p className="mt-3 text-xs text-[var(--muted)]">
-              {t("Typed or spoken. English or Hindi.", "टाइप या बोलकर। अंग्रेज़ी या हिंदी।")}
-            </p>
-          </div>
-        </section>
+        {/* Ask-bar demo: animated typing + staged pipeline + mock verified rows */}
+        <div className="fade-up fade-up-4 mx-auto mt-10 max-w-2xl">
+          <DemoSearch />
+          <p className="mt-3 text-center text-xs text-[var(--muted)]">
+            {t("Typed or spoken. English or Hindi.", "टाइप या बोलकर। अंग्रेज़ी या हिंदी।")}
+          </p>
+        </div>
+      </section>
 
         <hr className="rule mx-auto max-w-5xl" />
 
         {/* How it works - horizontal pipeline */}
         <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
-          <p className="overline mono">{t("How it works", "यह कैसे काम करता है")}</p>
-          <h2 className="display mt-3 text-3xl sm:text-4xl">
+          <p className="overline mono text-center">{t("How it works", "यह कैसे काम करता है")}</p>
+          <h2 className="display mt-3 text-center text-3xl sm:text-4xl">
             {t("From question to dataset, in one pass", "सवाल से डेटासेट तक, एक ही बार में")}
           </h2>
+          <div className="mt-3 text-center text-sm text-[var(--muted)]">
+            {t("From a plain-language question to a verified, source-linked dataset.", "साधारण सवाल से सत्यापित, स्रोत-लिंक्ड डेटासेट तक।")}
+          </div>
           <ol className="mt-12 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-0">
             {PIPELINE.map((stage, i) => (
               <li key={stage} className="flex items-start gap-6 sm:flex-1 sm:flex-col sm:gap-4">
@@ -205,16 +230,14 @@ export default function LandingPage() {
                 )}
               </p>
             </div>
-            <ul>
+            <ul className="mt-2 grid gap-4 sm:grid-cols-2">
               {PERSONAS.map((p) => (
-                <li key={p.id} className="row-line py-5 first:pt-0 last:pb-0 sm:py-6">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <h3 className="text-base font-medium">
-                      {t(p.label, p.hi)}
-                    </h3>
-                    <span className="mono text-xs text-[var(--muted)]">0{PERSONAS.findIndex((x) => x.id === p.id) + 1}</span>
+                <li key={p.id} className="card p-5 transition-all duration-200 hover:-translate-y-0.5">
+                  <div className="flex items-center justify-between gap-4">
+                    <h3 className="text-base font-semibold">{t(p.label, p.hi)}</h3>
+                    <span className="mono text-xs text-[var(--faint)]">0{PERSONAS.findIndex((x) => x.id === p.id) + 1}</span>
                   </div>
-                  <p className="mt-1 text-sm text-[var(--muted)]">{p.blurb}</p>
+                  <p className="mt-1.5 text-sm text-[var(--muted)]">{p.blurb}</p>
                 </li>
               ))}
             </ul>
@@ -247,9 +270,16 @@ export default function LandingPage() {
                 k: t("Flagged, not hidden", "छिपाया नहीं, फ़्लैग किया"),
                 v: t("Incomplete rows stay visible - clearly marked.", "अधूरी पंक्तियां दिखती रहती हैं - साफ़ निशान के साथ।"),
               },
-            ].map((row) => (
-              <div key={row.k} className="row-line grid gap-1 py-6 sm:grid-cols-[220px_1fr] sm:gap-8">
-                <h3 className="text-base font-medium">{row.k}</h3>
+            ].map((row, i) => (
+              <div key={row.k} className="row-line grid gap-1 py-6 sm:grid-cols-[48px_220px_1fr] sm:gap-6">
+                <span
+                  aria-hidden
+                  className="mono hidden size-8 items-center justify-center rounded-full text-xs font-semibold sm:flex"
+                  style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+                >
+                  {i + 1}
+                </span>
+                <h3 className="text-base font-semibold">{row.k}</h3>
                 <p className="text-sm text-[var(--muted)] sm:text-base">{row.v}</p>
               </div>
             ))}
@@ -257,27 +287,49 @@ export default function LandingPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-y border-[var(--border)] bg-[var(--surface-2)]">
-          <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-5 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
-            <h2 className="display max-w-xl text-3xl sm:text-4xl">
+        <section className="px-5 pb-4 pt-8 sm:pt-12">
+          <div
+            className="mx-auto max-w-5xl overflow-hidden rounded-[var(--radius-xl)] px-6 py-16 text-center sm:py-20"
+            style={{
+              background: "linear-gradient(135deg, var(--accent-strong), var(--accent-hover))",
+              color: "#ffffff",
+            }}
+          >
+            <p
+              className="mono text-xs uppercase tracking-[0.2em]"
+              style={{ color: "rgba(255,255,255,0.75)" }}
+            >
+              {t("Instant intelligence setup", "तुरंत शुरू करें")}
+            </p>
+            <h2 className="display mx-auto mt-4 max-w-2xl text-3xl sm:text-4xl">
               {t("Ask your first question today.", "आज अपना पहला सवाल पूछें।")}
             </h2>
-            {user ? (
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {user ? (
+                <Link
+                  href="/workspace"
+                  className="flex min-h-[44px] items-center rounded-full bg-white px-6 text-sm font-semibold transition-transform hover:scale-[1.02]"
+                  style={{ color: "var(--accent-strong)" }}
+                >
+                  {t("Go to workspace", "वर्कस्पेस खोलें")}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openAuth("signup")}
+                  className="flex min-h-[44px] items-center rounded-full bg-white px-6 text-sm font-semibold transition-transform hover:scale-[1.02]"
+                  style={{ color: "var(--accent-strong)" }}
+                >
+                  {t("Get Started Free", "मुफ़्त में शुरू करें")}
+                </button>
+              )}
               <Link
                 href="/workspace"
-                className="btn-primary flex min-h-[44px] shrink-0 items-center rounded-full px-6 text-sm font-medium"
+                className="flex min-h-[44px] items-center rounded-full border border-white/40 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
               >
-                {t("Go to workspace", "वर्कस्पेस खोलें")}
+                {t("Explore the workspace", "वर्कस्पेस देखें")}
               </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => openAuth("signup")}
-                className="btn-primary flex min-h-[44px] shrink-0 items-center rounded-full px-6 text-sm font-medium"
-              >
-                {t("Get Started", "शुरू करें")}
-              </button>
-            )}
+            </div>
           </div>
         </section>
       </main>
