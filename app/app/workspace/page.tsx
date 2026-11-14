@@ -300,13 +300,9 @@ export default function Workspace() {
       </header>
 
       {/* Prompt card */}
-      <section
-        className="rounded-lg p-4 sm:p-6"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-2)" }}
-        aria-labelledby="ask-heading"
-      >
-        <h2 id="ask-heading" className="mono text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
-          {t("Your question", "आपका प्रश्न")}
+      <section className="card p-4 shadow-[var(--shadow-2)] sm:p-6" aria-labelledby="ask-heading">
+        <h2 id="ask-heading" className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+          {t("Natural language query to structured intelligence", "साधारण भाषा से संरचित इंटेलिजेंस तक")}
         </h2>
         <form
           className="mt-3 flex flex-col gap-3 sm:flex-row"
@@ -323,8 +319,8 @@ export default function Workspace() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder='e.g. "AI developer jobs in Bengaluru this week"'
-            className="mono min-h-11 flex-1 rounded px-3 text-sm"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+            className="mono min-h-[44px] flex-1 rounded-full px-4 text-sm"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border-soft)", color: "var(--text)" }}
             maxLength={500}
           />
           <div className="flex gap-3">
@@ -332,22 +328,17 @@ export default function Workspace() {
               type="button"
               onClick={speak}
               disabled={running}
-              className="mono min-h-11 rounded px-4 text-sm font-semibold transition-opacity hover:opacity-85 disabled:opacity-50"
-              style={{
-                background: "var(--surface-2)",
-                border: "1px solid var(--border)",
-                color: speaking ? "var(--accent)" : "var(--text)",
-              }}
+              className="btn-secondary flex min-h-[44px] items-center rounded-full px-4 text-sm font-medium disabled:opacity-50"
+              style={{ color: speaking ? "var(--accent)" : "var(--text)" }}
             >
               {speaking ? t("● Listening…", "● सुन रहे हैं…") : t("◉ Speak", "◉ बोलें")}
             </button>
             <button
               type="submit"
               disabled={running || !prompt.trim()}
-              className="mono min-h-11 rounded px-5 text-sm font-bold transition-opacity hover:opacity-85 disabled:opacity-50"
-              style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
+              className="btn-primary flex min-h-[44px] items-center rounded-full px-6 text-sm font-semibold disabled:opacity-50"
             >
-              {running ? t("Running…", "चल रहा है…") : t("Run pipeline", "पाइपलाइन चलाएं")}
+              {running ? t("Running…", "चल रहा है…") : t("Run Pipeline", "पाइपलाइन चलाएं")}
             </button>
           </div>
         </form>
@@ -381,15 +372,12 @@ export default function Workspace() {
               return (
                 <li
                   key={stage}
-                  className="rounded px-3 py-2.5 text-xs transition-colors"
-                  style={{
-                    background: ok || active ? "var(--accent-dim)" : "var(--surface)",
-                    border: `1px solid ${ok || active ? "var(--accent)" : "var(--border)"}`,
-                    color: ok || active ? "var(--accent)" : "var(--muted)",
-                  }}
+                  className={`stage-chip ${ok ? "stage-chip-ok" : active ? "stage-chip-active" : "stage-chip-idle"}`}
                 >
-                  <span className="mono font-bold">{ok ? "✓" : active ? "◐" : "·"} </span>
-                  <span className="mono">{stageLabel(stage)}</span>
+                  <span aria-hidden className="text-[10px]">
+                    {ok ? "✓" : active ? "●" : "·"}
+                  </span>
+                  {stageLabel(stage)}
                 </li>
               );
             })}
@@ -530,8 +518,7 @@ export default function Workspace() {
               />
               <a
                 href={`/api/queries/${query?.id}/export`}
-                className="mono flex min-h-11 items-center rounded px-4 text-sm font-bold transition-opacity hover:opacity-85"
-                style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
+                className="btn-primary mono flex min-h-[44px] items-center rounded-full px-5 text-sm font-semibold"
               >
                 ↓ CSV
               </a>
@@ -542,12 +529,11 @@ export default function Workspace() {
               No rows match this filter. Clear the search or uncheck “complete rows only”.
             </p>
           ) : (
-            <ul className="mt-3 flex flex-col gap-2">
+              <ul className="mt-3 flex flex-col gap-2">
               {filtered.slice(0, 50).map((r) => (
                 <li
                   key={r.id}
-                  className="rounded px-4 py-3"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                  className="card px-4 py-3 transition-all duration-200 hover:-translate-y-0.5"
                 >
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="text-sm font-semibold">{r.title}</p>
@@ -557,6 +543,11 @@ export default function Workspace() {
                     </p>
                   </div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    {r.incomplete ? (
+                      <span className="badge badge-flagged">⚠ {t("Incomplete", "अधूरी")}</span>
+                    ) : (
+                      <span className="badge badge-verified">✓ {t("Verified", "सत्यापित")}</span>
+                    )}
                     {r.tags.slice(0, 4).map((tag) => (
                       <span
                         key={tag}
@@ -566,19 +557,13 @@ export default function Workspace() {
                         {tag}
                       </span>
                     ))}
-                    {r.incomplete && (
-                      <span className="mono rounded px-1.5 py-0.5 text-[11px]" style={{ background: "rgba(248,113,113,0.12)", color: "var(--danger)" }}>
-                        incomplete
-                      </span>
-                    )}
                     <a
                       href={r.sourceUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mono ml-auto text-xs underline underline-offset-4"
-                      style={{ color: "var(--accent)" }}
+                      className="btn-primary mono ml-auto flex min-h-[36px] items-center rounded-full px-4 text-xs font-semibold"
                     >
-                      source ↗
+                      {t("View Source ↗", "स्रोत देखें ↗")}
                     </a>
                   </div>
                 </li>

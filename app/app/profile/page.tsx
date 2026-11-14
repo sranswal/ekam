@@ -264,15 +264,12 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={status === "saving"}
-              className="min-h-11 rounded px-5 font-medium transition hover:opacity-90 active:opacity-80 disabled:opacity-50"
-              style={{ background: "var(--accent)", color: "var(--accent-contrast)", borderRadius: "var(--radius)" }}
+              className="btn-primary flex min-h-[44px] items-center rounded-full px-6 text-sm font-semibold disabled:opacity-50"
             >
               {status === "saving" ? t("Saving…", "सहेज रहे हैं…") : t("Save profile", "प्रोफ़ाइल सहेजें")}
             </button>
             {status === "saved" && (
-              <span className="text-sm" style={{ color: "var(--accent)" }}>
-                {t("Saved", "सहेजा गया")}
-              </span>
+              <span className="badge badge-verified">{t("Saved", "सहेजा गया")}</span>
             )}
           </div>
         </form>

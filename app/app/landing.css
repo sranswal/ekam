@@ -1,4 +1,4 @@
-/* Landing page - editorial monochrome ink. Tokens come from globals.css. */
+/* Landing page - Stitch design system: electric indigo on blue-tinted surfaces. */
 
 /* --- Hero entrance (the one signature motion) --- */
 @keyframes fade-up {
@@ -39,9 +39,10 @@
 
 /* --- Type --- */
 .display {
-  letter-spacing: -0.035em;
-  line-height: 1.04;
-  font-weight: 600;
+  font-family: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  font-weight: 800;
 }
 
 .overline {
