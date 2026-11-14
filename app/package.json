@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "test": "node --import tsx --test lib/pipeline.test.ts lib/voice-agent.test.ts",
+    "test": "node --import tsx --test lib/pipeline.test.ts",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:voice": "node --import tsx --test lib/voice-agent.test.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",
