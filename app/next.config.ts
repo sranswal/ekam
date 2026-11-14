@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  allowedDevOrigins: ["*.vercel.run"],
+  allowedDevOrigins: ["*.vercel.run", "127.0.0.1", "localhost"],
   turbopack: {
     rules: {
       "*.css": {
