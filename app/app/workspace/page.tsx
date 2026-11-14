@@ -86,18 +86,8 @@ export default function Workspace() {
   const [onlyComplete, setOnlyComplete] = useState(false);
   const [city, setCity] = useState("");
   const [maxAgeDays, setMaxAgeDays] = useState("");
-  const [history, setHistory] = useState<Query[]>([]);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const pollRef = useRef<number | null>(null);
-
-  const loadHistory = useCallback(async () => {
-    try {
-      const res = await fetch("/api/queries");
-      if (res.ok) setHistory(((await res.json()) as { queries: Query[] }).queries);
-    } catch {
-      /* history is best-effort */
-    }
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -141,10 +131,6 @@ export default function Workspace() {
     ? t(`Namaste, ${authUser.name}`, `नमस्ते, ${authUser.name}`)
     : t("all in one. ask, verify, export.", "सब एक जगह। पूछें, सत्यापित करें, निर्यात करें।");
   const personaLabel = persona ? t(persona.label, persona.hi) : null;
-
-  useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
 
   useEffect(() => {
     return () => {
@@ -204,7 +190,6 @@ export default function Workspace() {
         if (d.query.status !== "running") {
           if (pollRef.current) window.clearInterval(pollRef.current);
           setRunning(false);
-          loadHistory();
         }
       }, 400);
     } catch (e) {
@@ -214,14 +199,29 @@ export default function Workspace() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
-      <VoiceSession
-        open={voiceOpen}
-        onOpenChange={setVoiceOpen}
-        onSearch={(p) => void runQuery(p)}
-      />
-      {/* Header */}
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col">
       <SiteHeader />
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+        <VoiceSession
+          open={voiceOpen}
+          onOpenChange={setVoiceOpen}
+          onSearch={(p) => void runQuery(p)}
+          queryResult={
+            query
+              ? {
+                  id: query.id,
+                  prompt: query.prompt,
+                  status: query.status,
+                  kept: query.kept,
+                  top: rows.slice(0, 3).map((r) => ({
+                    title: r.title,
+                    company: r.company,
+                    location: r.location,
+                  })),
+                }
+              : null
+          }
+        />
       <div className="mb-8">
         <div>
           <h1 className="mono text-2xl font-bold leading-tight sm:text-4xl" style={{ color: "var(--text)" }}>
@@ -460,53 +460,10 @@ export default function Workspace() {
         </section>
       )}
 
-      {/* History */}
-      {history.length > 0 && (
-        <section className="mt-10" aria-label="Query history">
-          <h2 className="mono text-sm font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
-            {t("Recent queries", "हाल के प्रश्न")}
-          </h2>
-          <ul className="mt-3 flex flex-col gap-1.5">
-            {history.map((h) => (
-              <li key={h.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPrompt(h.prompt);
-                    fetch(`/api/queries/${h.id}`)
-                      .then((r) => r.json())
-                      .then((d: { query: Query; listings: Listing[] }) => {
-                        setQuery(d.query);
-                        setRows(d.listings);
-                      });
-                  }}
-                  className="mono flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-xs transition-colors hover:bg-black/30"
-                  style={{ border: "1px solid var(--border)", color: "var(--muted)" }}
-                >
-                  <span className="truncate">
-                    {h.prompt}
-                    {h.interpreted?.originalLanguage && h.interpreted.originalLanguage !== "en" && (
-                      <span
-                        className="mono ml-2 rounded px-1 py-0.5 text-[10px]"
-                        style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
-                      >
-                        {h.interpreted.originalLanguage}
-                      </span>
-                    )}
-                  </span>
-                  <span style={{ color: h.status === "error" ? "var(--danger)" : "var(--accent)" }}>
-                    {h.status === "error" ? "✗ error" : `✓ ${h.kept} rows`}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       <footer className="mono mt-12 border-t pt-4 text-xs" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
         ekam · every result verified, with a clickable source
       </footer>
     </main>
-  );
+  </div>
+);
 }

@@ -29,25 +29,8 @@ type ValidatedRow = {
 };
 
 export async function GET() {
-  const rows = await db.select().from(queries).orderBy(desc(queries.id)).limit(100);
-  const seen = new Set<string>();
-  const unique = rows.filter((q) => {
-    const key = q.prompt
-      .toLowerCase()
-      .replace(/[।.,!?؟]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    // "mujhe Noida Mein flat dikhaao." and "मुझे Noida में flat दिखाओ" are the same ask;
-    // collapse Hinglish romanisations and Devanagari into one key
-    const normalized = key
-      .replace(/में|मे|mein|me\b/g, "in")
-      .replace(/दिखाओ|dikhaao|dikhao|दिखा|show/g, "show")
-      .replace(/मुझे|mujhe|mujh/g, "i");
-    if (seen.has(normalized)) return false;
-    seen.add(normalized);
-    return true;
-  });
-  return Response.json({ queries: unique.slice(0, 20) });
+  // Recent queries across all users are not exposed publicly to keep user searches private.
+  return Response.json({ queries: [] });
 }
 
 export async function POST(request: Request) {

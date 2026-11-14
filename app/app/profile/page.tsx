@@ -156,13 +156,16 @@ export default function ProfilePage() {
 
   if (!authReady || loading) {
     return (
-      <main className="min-h-dvh p-6">
-        <div className="mx-auto max-w-2xl space-y-4" aria-busy>
-          <div className="h-8 w-40 animate-pulse rounded bg-black/10 dark:bg-white/10" />
-          <div className="h-40 animate-pulse rounded bg-black/10 dark:bg-white/10" />
-          <div className="h-64 animate-pulse rounded bg-black/10 dark:bg-white/10" />
-        </div>
-      </main>
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col">
+        <SiteHeader />
+        <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+          <div className="space-y-4" aria-busy>
+            <div className="h-8 w-40 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <div className="h-40 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+            <div className="h-64 animate-pulse rounded bg-black/10 dark:bg-white/10" />
+          </div>
+        </main>
+      </div>
     );
   }
 
@@ -176,9 +179,9 @@ export default function ProfilePage() {
   const showResume = personaId !== null && RESUME_PERSONAS.includes(personaId);
 
   return (
-    <main className="min-h-dvh px-4 py-10" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <div className="mx-auto max-w-2xl">
-        <SiteHeader />
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
         <h1 className="font-mono text-2xl tracking-tight" style={{ color: "var(--text)" }}>
           {t("Your profile", "आपकी प्रोफ़ाइल")}
         </h1>
@@ -292,7 +295,7 @@ export default function ProfilePage() {
             )}
           </div>
         </form>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

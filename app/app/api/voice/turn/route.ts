@@ -57,7 +57,6 @@ function parseResults(raw: unknown): ResultsLike {
 
 export async function POST(request: Request) {
   const user = await getSessionUser();
-  if (!user) return Response.json({ error: "not signed in" }, { status: 401 });
 
   let body: {
     history?: unknown;
@@ -77,8 +76,8 @@ export async function POST(request: Request) {
     const reply = await agentTurn({
       history: parseTurns(body.history),
       userText: body.userText,
-      userName: user.name,
-      persona: user.persona,
+      userName: user?.name ?? null,
+      persona: user?.persona ?? null,
       pendingResults: parseResults(body.pendingResults),
     });
     return Response.json(reply);

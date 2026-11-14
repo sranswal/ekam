@@ -121,8 +121,8 @@ function buildPrompt(ctx: AgentContext): string {
     ctx.userName ? `The user's name is ${ctx.userName}; use it once when it feels natural.` : "",
     ctx.persona ? `The user's profile is: ${ctx.persona}.` : "",
     "You have one tool: the ekam pipeline, which finds verified rows (jobs, properties, tenders, events) and returns each row with its source.",
-    'Reply with ONLY a JSON object: {"reply": "<what you say now>", "replyHindi": "<Hindi (Devanagari) version of the same reply, or null if the reply is already Hindi>", "search": true|false}.',
-    'Set "search": true ONLY when the user is asking to find/see real rows right now (a job, flat, tender, event...). When "search": true, put the cleaned-up search request into "reply" as a short confirmation of exactly what you are searching, e.g. "Ek minute, AI developer jobs in Bengaluru dhoond raha hoon."',
+    'Reply with ONLY a JSON object: {"reply": "<what you say now>", "replyHindi": "<Hindi (Devanagari) version of the same reply, or null if the reply is already Hindi>", "search": true|false, "query": "<short search query string for the pipeline, or null>"}.',
+    'Set "search": true ONLY when the user is asking to find/see real rows right now (a job, flat, tender, event...). When "search": true, put the cleaned-up search request into "query" (e.g. "AI developer jobs in Bengaluru") and put a short spoken confirmation into "reply" (e.g. "One moment, searching for AI developer jobs in Bengaluru.").',
     "If PIPELINE_RESULT is given, speak its result like a person: how many verified rows, the top 2-3 by title/company/location, and mention duplicates removed if any. Never invent rows that are not in PIPELINE_RESULT.",
     "Do not repeat your earlier sentences. Be natural, like a person on a phone call.",
     "",
@@ -160,12 +160,16 @@ async function callGemini(model: string, key: string, prompt: string): Promise<A
     reply?: string;
     replyHindi?: string | null;
     search?: boolean;
+    query?: string | null;
   };
   if (!parsed.reply || typeof parsed.reply !== "string") throw new Error("empty reply");
+  const actionPrompt = (parsed.query && typeof parsed.query === "string" && parsed.query.trim())
+    ? parsed.query.trim().slice(0, 500)
+    : "";
   return {
     reply: parsed.reply.slice(0, 600),
     replyHindi: parsed.replyHindi && typeof parsed.replyHindi === "string" ? parsed.replyHindi.slice(0, 600) : null,
-    action: parsed.search === true ? { type: "run_query", prompt: "" } : null,
+    action: parsed.search === true ? { type: "run_query", prompt: actionPrompt } : null,
     source: "gemini",
   };
 }
