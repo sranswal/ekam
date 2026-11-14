@@ -72,7 +72,7 @@ export default function OnboardingPage() {
       router.push("/workspace");
       router.refresh();
     } catch {
-      setError(t("Network error — try again.", "नेटवर्क त्रुटि — फिर कोशिश करें।"));
+      setError(t("Network error - try again.", "नेटवर्क त्रुटि - फिर कोशिश करें।"));
     } finally {
       setBusy(false);
     }
@@ -130,8 +130,8 @@ export default function OnboardingPage() {
               <h1 className="mono text-lg text-[var(--text)]">{t("Welcome to ekam", "ekam में आपका स्वागत है")}</h1>
               <p className="text-sm text-[var(--muted)]">
                 {t(
-                  "all in one — ask, verify, export. First — who are you?",
-                  "अपने शब्दों में पूछें। सत्यापित, स्रोत-सहित उत्तर पाएँ। पहले — आप कौन हैं?",
+                  "all in one - ask, verify, export. First - who are you?",
+                  "अपने शब्दों में पूछें। सत्यापित, स्रोत-सहित उत्तर पाएँ। पहले - आप कौन हैं?",
                 )}
               </p>
               <fieldset>

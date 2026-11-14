@@ -1,22 +1,22 @@
-# ekam — all in one
+# ekam - all in one
 
-**Name:** ekam (from Sanskrit: "one"). One question, one verified answer, one place — all in one.
+**Name:** ekam (from Sanskrit: "one"). One question, one verified answer, one place - all in one.
 Repo: https://github.com/sranswal/ekam
 
 ## The problem
 
-In India, finding anything official — a job, a flat, a tender, a scheme — means hopping across
+In India, finding anything official - a job, a flat, a tender, a scheme - means hopping across
 dozens of sites full of duplicate, stale or fake listings. The information exists, but it is
 scattered, untranslated and unverified. A student in Meerut and a founder in Coimbatore ask the
 same question in different words and both end up with tabs of noise.
 
 ## What ekam is
 
-ekam is a **verified-opportunity finder**. You ask in your own words — typed or spoken, English
-or Hindi ("mujhe Noida mein flat dikhao", "AI developer jobs in Bengaluru") — and ekam:
+ekam is a **verified-opportunity finder**. You ask in your own words - typed or spoken, English
+or Hindi ("mujhe Noida mein flat dikhao", "AI developer jobs in Bengaluru") - and ekam:
 
 1. **Understands** the intent, vertical and location (Gemini, with a deterministic fallback).
-2. **Searches** the right live sources for that vertical — jobs, properties, tenders, events.
+2. **Searches** the right live sources for that vertical - jobs, properties, tenders, events.
 3. **Verifies and ranks** results: deduplication, source trust, freshness.
 4. **Returns one clean, source-linked dataset** you can view, filter and export (CSV/JSON).
 
@@ -25,13 +25,12 @@ carries its source and timestamp, so "verified" is checkable, not a claim.
 
 ## Who it is for (from day one)
 
-ekam was designed for five personas, chosen at signup so the interface adapts:
+ekam was designed for four personas, chosen at signup so the interface adapts:
 
-- **Job seekers** — verified roles matched to skills and city.
-- **Students** — internships, first jobs, skill pathways.
-- **SMEs / founders** — tenders, suppliers, properties, hiring.
-- **Agencies** — bulk sourcing and clean datasets for clients.
-- **Recruiters** — demand tracking across cities.
+- **Job seekers** - verified roles matched to skills and city.
+- **Students** - internships, first jobs, skill pathways.
+- **SMEs / founders** - tenders, suppliers, properties, hiring.
+- **Agencies** - bulk sourcing and clean datasets for clients.
 
 ## Product principles
 
@@ -43,15 +42,17 @@ ekam was designed for five personas, chosen at signup so the interface adapts:
 
 ## The product flow (designed, not retrofitted)
 
-1. **Landing page** — what ekam does, who it is for. Language (EN/HI), theme (light/dark),
-   log in and create-account entry points are always visible.
-2. **Account** — email + password, session cookie, redirect guard for private pages.
-3. **Onboarding** — one question: what will you use ekam for? (job seeker, student, SME,
-   agency, recruiter). This shapes the workspace, not just a label.
-4. **Workspace** — the ask bar (text + voice), a live pipeline tracker
+1. **Landing page** - what ekam does, who it is for. Language (EN/HI), theme (light/dark),
+   a demo search animation, and one unified **Get Started** button that opens the
+   sign-in / sign-up overlay (no real search until you are signed in).
+2. **Account** - email + password in the overlay, session cookie, redirect guard for
+   private pages.
+3. **Onboarding** - one question: what will you use ekam for? (job seeker, student, SME,
+   agency). This shapes the workspace, not just a label.
+4. **Workspace** - the ask bar (text + voice), a live pipeline tracker
    (interpret → fetch → verify → store → serve), verified results with sources, unique recent
    queries, export.
-5. **Profile** — resume/skill profile that sharpens matching over time.
+5. **Profile** - resume/skill profile that sharpens matching over time.
 
 ## Architecture
 
@@ -64,7 +65,7 @@ ekam was designed for five personas, chosen at signup so the interface adapts:
 
 ## Voice, as an interface
 
-Voice is not a dictation toy — it is the primary interface for the next hundred million users.
+Voice is not a dictation toy - it is the primary interface for the next hundred million users.
 Shipped: voice input to the ask bar. Next: a full conversational voice session (Agora RTC)
 where ekam speaks results back and asks clarifying questions.
 

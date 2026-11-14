@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * ekam design tokens — monochrome ink, from the light-mode brand reference.
+ * ekam design tokens - monochrome ink, from the light-mode brand reference.
  * One accent (ink itself), calm neutrals, two radii, two shadow levels.
  * Light is the default; .dark on <html> inverts the same scale.
  */

@@ -2,7 +2,7 @@ export const BRAND = {
   name: "ekam",
   tagline: "all in one",
   description:
-    "ekam turns a plain-language question — in English or Hindi — into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
+    "ekam turns a plain-language question - in English or Hindi - into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
   repo: "https://github.com/sranswal/ekam",
 } as const;
 

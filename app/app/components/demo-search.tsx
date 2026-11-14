@@ -9,16 +9,16 @@ const DEMOS: { chip: string; stages: string[]; rows: Row[] }[] = [
     chip: "mujhe Noida mein flat dikhao",
     stages: ["Hindi → property · Noida", "fetching listings…", "verifying 3 sources…"],
     rows: [
-      { title: "2BHK flat, Sector 62 — ₹68L", source: "99acres.com", meta: "verified · just now" },
-      { title: "3BHK flat, Sector 128 — ₹1.1Cr", source: "housing.com", meta: "verified · just now" },
-      { title: "1BHK rental, Sector 18 — ₹18k/mo", source: "magicbricks.in", meta: "verified · just now" },
+      { title: "2BHK flat, Sector 62 - ₹68L", source: "99acres.com", meta: "verified · just now" },
+      { title: "3BHK flat, Sector 128 - ₹1.1Cr", source: "housing.com", meta: "verified · just now" },
+      { title: "1BHK rental, Sector 18 - ₹18k/mo", source: "magicbricks.in", meta: "verified · just now" },
     ],
   },
   {
     chip: "AI developer jobs in Bengaluru",
     stages: ["English → jobs · Bengaluru", "fetching listings…", "verifying 3 sources…"],
     rows: [
-      { title: "Senior AI Engineer — Infra · ₹35-50 LPA", source: "careers.page", meta: "verified · just now" },
+      { title: "Senior AI Engineer - Infra · ₹35-50 LPA", source: "careers.page", meta: "verified · just now" },
       { title: "ML Engineer, LLM platform · ₹28-40 LPA", source: "company-hr.in", meta: "verified · just now" },
       { title: "AI Developer (GenAI) · ₹22-32 LPA", source: "jobs-portal.co", meta: "verified · just now" },
     ],
@@ -27,9 +27,9 @@ const DEMOS: { chip: string; stages: string[]; rows: Row[] }[] = [
     chip: "upcoming tenders in Jaipur",
     stages: ["English → tenders · Jaipur", "fetching listings…", "verifying 3 sources…"],
     rows: [
-      { title: "Ward 12 road resurfacing — ₹4.2Cr", source: "jnumauction.gov.in", meta: "verified · just now" },
-      { title: "Solar rooftop, govt college — ₹86L", source: "tup.gov.in", meta: "verified · just now" },
-      { title: "City bus stop refurbishment — ₹31L", source: "rtc.jhar.gov.in", meta: "verified · just now" },
+      { title: "Ward 12 road resurfacing - ₹4.2Cr", source: "jnumauction.gov.in", meta: "verified · just now" },
+      { title: "Solar rooftop, govt college - ₹86L", source: "tup.gov.in", meta: "verified · just now" },
+      { title: "City bus stop refurbishment - ₹31L", source: "rtc.jhar.gov.in", meta: "verified · just now" },
     ],
   },
 ];
@@ -119,7 +119,7 @@ export default function DemoSearch() {
       </div>
 
       <div aria-live="polite" className="sr-only">
-        {phase === "results" ? demo.rows.map((r) => `${r.title} — ${r.source}`).join(", ") : demo.chip}
+        {phase === "results" ? demo.rows.map((r) => `${r.title} - ${r.source}`).join(", ") : demo.chip}
       </div>
 
       {phase === "stages" && (

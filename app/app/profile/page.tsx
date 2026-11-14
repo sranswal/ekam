@@ -141,7 +141,7 @@ export default function ProfilePage() {
       }
       setStatus("saved");
     } catch {
-      setError(t("network error — try again", "नेटवर्क त्रुटि — फिर कोशिश करें"));
+      setError(t("network error - try again", "नेटवर्क त्रुटि - फिर कोशिश करें"));
       setStatus("error");
     }
   }

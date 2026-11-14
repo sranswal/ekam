@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ekam — all in one",
+  title: "ekam - all in one",
   description:
-    "ekam turns a plain-language question — in English or Hindi — into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
+    "ekam turns a plain-language question - in English or Hindi - into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
 };
 
 const themeInit = `(function(){try{var t=localStorage.getItem("ekam-theme");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);document.documentElement.classList.toggle("light",!d);}catch(e){}})();`;

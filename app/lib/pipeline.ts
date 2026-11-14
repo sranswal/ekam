@@ -129,7 +129,7 @@ async function callGemini(model: string, key: string, prompt: string) {
               parts: [
                 {
                   text:
-                    'Interpret this data request into JSON with keys topic (short english label), vertical (one of: jobs, properties, tenders, events, general — what kind of real-world opportunity is asked for), role (one lowercase word like ai/frontend/backend/data/developer/flat/tender/event), location (city or "Remote"), keywords (array of english search keywords), recencyDays (number or null, from phrases like "this week"), originalLanguage (en/hi/hinglish), translatedPrompt (english translation, null if already english), hindiTranslation (the request rewritten in Hindi Devanagari, null if already Hindi). Reply with ONLY the JSON. Request: ' +
+                    'Interpret this data request into JSON with keys topic (short english label), vertical (one of: jobs, properties, tenders, events, general - what kind of real-world opportunity is asked for), role (one lowercase word like ai/frontend/backend/data/developer/flat/tender/event), location (city or "Remote"), keywords (array of english search keywords), recencyDays (number or null, from phrases like "this week"), originalLanguage (en/hi/hinglish), translatedPrompt (english translation, null if already english), hindiTranslation (the request rewritten in Hindi Devanagari, null if already Hindi). Reply with ONLY the JSON. Request: ' +
                     prompt,
                 },
               ],
@@ -161,7 +161,7 @@ export async function interpretPrompt(prompt: string): Promise<Interpreted> {
       const parsed = await callGemini(
         model,
         key,
-        'Interpret this data request into JSON with keys topic (short english label), vertical (one of: jobs, properties, tenders, events, general — what kind of real-world opportunity is asked for), role (one lowercase word like ai/frontend/backend/data/developer/flat/tender/event), location (city or "Remote"), keywords (array of english search keywords), recencyDays (number or null, from phrases like "this week"), originalLanguage (en/hi/hinglish), translatedPrompt (english translation, null if already english), hindiTranslation (the request rewritten in Hindi Devanagari, null if already Hindi). Reply with ONLY the JSON. Request: ' +
+        'Interpret this data request into JSON with keys topic (short english label), vertical (one of: jobs, properties, tenders, events, general - what kind of real-world opportunity is asked for), role (one lowercase word like ai/frontend/backend/data/developer/flat/tender/event), location (city or "Remote"), keywords (array of english search keywords), recencyDays (number or null, from phrases like "this week"), originalLanguage (en/hi/hinglish), translatedPrompt (english translation, null if already english), hindiTranslation (the request rewritten in Hindi Devanagari, null if already Hindi). Reply with ONLY the JSON. Request: ' +
           prompt,
       );
       return { ...parsed, source: "gemini" };
@@ -204,7 +204,7 @@ export type SerpResult = {
 };
 
 const INR_RE =
-  /₹\s?[\d][\d,.]*\s?(k|K|lakh|L|crore|Cr|crores)?(?:\s?[–-]\s?₹?\s?[\d][\d,.]*\s?(k|K|lakh|L|crore|Cr|crores)?)?/;
+  /₹\s?[\d][\d,.]*\s?(k|K|lakh|L|crore|Cr|crores)?(?:\s?[--]\s?₹?\s?[\d][\d,.]*\s?(k|K|lakh|L|crore|Cr|crores)?)?/;
 
 function domainName(url: string): string {
   try {

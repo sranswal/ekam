@@ -229,7 +229,7 @@ export default function Workspace() {
         .SpeechRecognition ??
       (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition;
     if (!SR) {
-      setError("Voice input is not supported in this browser — type your question instead.");
+      setError("Voice input is not supported in this browser - type your question instead.");
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -293,8 +293,8 @@ export default function Workspace() {
         </div>
         <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: "var(--muted)" }}>
           {t(
-            "Type or speak a question in English, Hindi or Hinglish — jobs, properties, tenders or events. Watch the pipeline interpret, collect, validate and return every row with a clickable source — no scraping, no black box.",
-            "अंग्रेज़ी, हिंदी या हिंग्लिश में प्रश्न लिखें या बोलें — नौकरियां, प्रॉपर्टी, टेंडर या इवेंट्स। पाइपलाइन को हर स्रोत के साथ सत्यापित परिणाम देते देखें।"
+            "Type or speak a question in English, Hindi or Hinglish - jobs, properties, tenders or events. Watch the pipeline interpret, collect, validate and return every row with a clickable source - no scraping, no black box.",
+            "अंग्रेज़ी, हिंदी या हिंग्लिश में प्रश्न लिखें या बोलें - नौकरियां, प्रॉपर्टी, टेंडर या इवेंट्स। पाइपलाइन को हर स्रोत के साथ सत्यापित परिणाम देते देखें।"
           )}
         </p>
       </header>

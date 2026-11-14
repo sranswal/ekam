@@ -73,7 +73,7 @@ export default function AuthModal({
       router.push(needsOnboarding ? "/onboarding" : "/workspace");
       router.refresh();
     } catch {
-      setError(t("network error — try again", "नेटवर्क त्रुटि — फिर कोशिश करें"));
+      setError(t("network error - try again", "नेटवर्क त्रुटि - फिर कोशिश करें"));
     } finally {
       setBusy(false);
     }

@@ -59,7 +59,7 @@ export default function LandingPage() {
     if (auth === "signup") setAuthModal("signup");
   }, []);
 
-  // When the modal is open the landing page scrolls beneath it — re-check auth after close.
+  // When the modal is open the landing page scrolls beneath it - re-check auth after close.
   const openAuth = (mode: AuthMode) => setAuthModal(mode);
 
   return (
@@ -138,8 +138,8 @@ export default function LandingPage() {
           </h1>
           <p className="fade-up fade-up-3 mt-6 max-w-2xl text-lg text-[var(--muted)]">
             {t(
-              "ekam turns a plain-language question — in English or Hindi — into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
-              "ekam आपके साधारण सवाल — अंग्रेज़ी या हिंदी में — को सत्यापित, स्रोत-लिंक्ड डेटासेट में बदलता है: नौकरियां, प्रॉपर्टी, टेंडर, इवेंट और भी बहुत कुछ।",
+              "ekam turns a plain-language question - in English or Hindi - into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
+              "ekam आपके साधारण सवाल - अंग्रेज़ी या हिंदी में - को सत्यापित, स्रोत-लिंक्ड डेटासेट में बदलता है: नौकरियां, प्रॉपर्टी, टेंडर, इवेंट और भी बहुत कुछ।",
             )}
           </p>
 
@@ -154,7 +154,7 @@ export default function LandingPage() {
 
         <hr className="rule mx-auto max-w-5xl" />
 
-        {/* How it works — horizontal pipeline */}
+        {/* How it works - horizontal pipeline */}
         <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
           <p className="overline mono">{t("How it works", "यह कैसे काम करता है")}</p>
           <h2 className="display mt-3 text-3xl sm:text-4xl">
@@ -190,7 +190,7 @@ export default function LandingPage() {
 
         <hr className="rule mx-auto max-w-5xl" />
 
-        {/* Who it's for — five personas, asymmetric list */}
+        {/* Who it's for - five personas, asymmetric list */}
         <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
           <div className="grid gap-12 sm:grid-cols-[1fr_2fr]">
             <div>
@@ -223,7 +223,7 @@ export default function LandingPage() {
 
         <hr className="rule mx-auto max-w-5xl" />
 
-        {/* Why verified — source-linked rows */}
+        {/* Why verified - source-linked rows */}
         <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
           <p className="overline mono">{t("Why verified", "सत्यापन क्यों")}</p>
           <h2 className="display mt-3 max-w-2xl text-3xl sm:text-4xl">
@@ -245,7 +245,7 @@ export default function LandingPage() {
               },
               {
                 k: t("Flagged, not hidden", "छिपाया नहीं, फ़्लैग किया"),
-                v: t("Incomplete rows stay visible — clearly marked.", "अधूरी पंक्तियां दिखती रहती हैं — साफ़ निशान के साथ।"),
+                v: t("Incomplete rows stay visible - clearly marked.", "अधूरी पंक्तियां दिखती रहती हैं - साफ़ निशान के साथ।"),
               },
             ].map((row) => (
               <div key={row.k} className="row-line grid gap-1 py-6 sm:grid-cols-[220px_1fr] sm:gap-8">
