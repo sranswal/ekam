@@ -11,8 +11,6 @@ import "./landing.css";
 
 type User = { id: number; name?: string; email?: string };
 
-const PIPELINE = ["interpret", "fetch", "verify", "store", "serve"] as const;
-
 function Wordmark() {
   return (
     <Link href="/" className="flex items-center gap-2" aria-label="ekam home">
@@ -142,26 +140,24 @@ export default function LandingPage() {
             }}
           >
             <span aria-hidden className="size-1.5 rounded-full" style={{ background: "var(--success)" }} />
-            {t("ekam v1 · live engine", "ekam v1 · लाइव इंजन")}
-            <span aria-hidden className="text-[var(--faint)]">·</span>
-            {t("single source of truth", "एक ही स्रोत")}
+            {t("free · in beta", "फ्री · बीटा में")}
           </span>
         </div>
         <h1 className="display fade-up fade-up-2 mt-6 max-w-4xl text-center text-4xl sm:text-6xl">
           {lang === "en" ? (
             <>
-              One question. <span style={{ color: "var(--accent)" }}>Every source.</span>
+              Ask. <span style={{ color: "var(--accent)" }}>Get answers.</span>
             </>
           ) : (
             <>
-              एक सवाल। <span style={{ color: "var(--accent)" }}>हर स्रोत।</span>
+              पूछो। <span style={{ color: "var(--accent)" }}>जवाब पाओ।</span>
             </>
           )}
         </h1>
         <p className="fade-up fade-up-3 mx-auto mt-6 max-w-2xl text-center text-lg text-[var(--muted)]">
           {t(
-            "ekam turns a plain-language question - in English or Hindi - into a verified, source-linked dataset: jobs, properties, tenders, events and more.",
-            "ekam आपके साधारण सवाल - अंग्रेज़ी या हिंदी में - को सत्यापित, स्रोत-लिंक्ड डेटासेट में बदलता है: नौकरियां, प्रॉपर्टी, टेंडर, इवेंट और भी बहुत कुछ।",
+            "Just ask in your own words - English, Hindi or Hinglish. ekam finds jobs, homes, tenders and events near you, and shows you where every answer came from.",
+            "अपने शब्दों में बस पूछिए - अंग्रेज़ी, हिंदी या हिंग्लिश में। ekam आपके लिए नौकरियां, घर, टेंडर और इवेंट ढूंढता है, और बताता है कि हर जवाब कहां से आया।",
           )}
         </p>
 
@@ -176,37 +172,33 @@ export default function LandingPage() {
 
         <hr className="rule mx-auto max-w-5xl" />
 
-        {/* How it works - horizontal pipeline */}
+        {/* How it works - three plain steps */}
         <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
           <p className="overline mono text-center">{t("How it works", "यह कैसे काम करता है")}</p>
           <h2 className="display mt-3 text-center text-3xl sm:text-4xl">
-            {t("From question to dataset, in one pass", "सवाल से डेटासेट तक, एक ही बार में")}
+            {t("Ask, and it's done", "पूछिए, बस हो गया")}
           </h2>
           <div className="mt-3 text-center text-sm text-[var(--muted)]">
-            {t("From a plain-language question to a verified, source-linked dataset.", "साधारण सवाल से सत्यापित, स्रोत-लिंक्ड डेटासेट तक।")}
+            {t("No forms, no filters, no digging through ten sites.", "ना फॉर्म, ना फ़िल्टर, ना दस वेबसाइटों में खुदाई।")}
           </div>
           <ol className="mt-12 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-0">
-            {PIPELINE.map((stage, i) => (
-              <li key={stage} className="flex items-start gap-6 sm:flex-1 sm:flex-col sm:gap-4">
+            {(
+              [
+                ["ask", t("Just ask", "बस पूछिए"), t("Say it or type it, in your own words - English, Hindi or Hinglish.", "अपने शब्दों में बोलिए या लिखिए - अंग्रेज़ी, हिंदी या हिंग्लिश।")],
+                ["search", t("ekam searches", "ekam खोजता है"), t("It looks across trusted sources the moment you ask.", "आपके पूछते ही भरोसेमंद स्रोतों पर खोजता है।")],
+                ["answers", t("You get answers", "आपको जवाब मिलते हैं"), t("Real results you can trust, each with a link to where it came from.", "भरोसेमंद असली नतीजे, हर एक के साथ उसके स्रोत का लिंक।")],
+              ] as const
+            ).map(([key, title, desc], i) => (
+              <li key={key} className="flex items-start gap-6 sm:flex-1 sm:flex-col sm:gap-4">
                 <div className="flex items-center w-full sm:w-auto">
                   <span className="mono flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-xs text-[var(--accent-contrast)]">
                     {i + 1}
                   </span>
-                  {i < PIPELINE.length - 1 && <span className="pipeline-line hidden sm:block" aria-hidden="true" />}
+                  {i < 2 && <span className="pipeline-line hidden sm:block" aria-hidden="true" />}
                 </div>
                 <div className="sm:pr-6">
-                  <h3 className="mono text-sm font-medium first-letter:uppercase">{stage}</h3>
-                  <p className="mt-1 text-sm text-[var(--muted)]">
-                    {
-                      {
-                        interpret: t("Parse the language, the intent, the vertical.", "भाषा, इरादा और वर्टिकल समझें।"),
-                        fetch: t("Sweep the live web for matching listings.", "मैचिंग लिस्टिंग्स के लिए वेब खंगालें।"),
-                        verify: t("Check every row against its source.", "हर पंक्ति को उसके स्रोत से जांचें।"),
-                        store: t("Deduplicate and keep only what holds.", "डुप्लिकेट हटाएं, सिर्फ़ सही रखें।"),
-                        serve: t("Deliver a clean, source-linked table.", "साफ़, स्रोत-लिंक्ड टेबल दें।"),
-                      }[stage]
-                    }
-                  </p>
+                  <h3 className="mono text-sm font-medium">{title}</h3>
+                  <p className="mt-1 text-sm text-[var(--muted)]">{desc}</p>
                 </div>
               </li>
             ))}
@@ -225,8 +217,8 @@ export default function LandingPage() {
               </h2>
               <p className="mt-4 text-sm text-[var(--muted)]">
                 {t(
-                  "ekam is not a job board. The vertical comes from the question you ask.",
-                  "ekam कोई जॉब बोर्ड नहीं है। वर्टिकल आपके सवाल से तय होता है।",
+                  "ekam is not a job board. What it finds depends on the question you ask.",
+                  "ekam कोई जॉब बोर्ड नहीं है। जो मिलता है, वो आपके सवाल पर निर्भर है।",
                 )}
               </p>
             </div>
@@ -246,11 +238,11 @@ export default function LandingPage() {
 
         <hr className="rule mx-auto max-w-5xl" />
 
-        {/* Why verified - source-linked rows */}
+        {/* Why you can trust the results */}
         <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
-          <p className="overline mono">{t("Why verified", "सत्यापन क्यों")}</p>
+          <p className="overline mono">{t("Why trust it", "भरोसा क्यों")}</p>
           <h2 className="display mt-3 max-w-2xl text-3xl sm:text-4xl">
-            {t("Every row answers to its source", "हर पंक्ति अपने स्रोत के ज़िम्मेदार है")}
+            {t("Every answer shows where it came from", "हर जवाब बताता है कि वो कहां से आया")}
           </h2>
           <div className="mt-12">
             {[
@@ -267,8 +259,8 @@ export default function LandingPage() {
                 v: t("The same posting never shows up twice.", "एक ही पोस्टिंग दोबारा नहीं दिखती।"),
               },
               {
-                k: t("Flagged, not hidden", "छिपाया नहीं, फ़्लैग किया"),
-                v: t("Incomplete rows stay visible - clearly marked.", "अधूरी पंक्तियां दिखती रहती हैं - साफ़ निशान के साथ।"),
+                k: t("Nothing hidden", "कुछ छिपाया नहीं"),
+                v: t("If a listing looks incomplete, it's clearly marked - not quietly dropped.", "अगर कोई लिस्टिंग अधूरी लगे, तो साफ़ निशान के साथ दिखती है - चुपचाप हटाई नहीं जाती।"),
               },
             ].map((row, i) => (
               <div key={row.k} className="row-line grid gap-1 py-6 sm:grid-cols-[48px_220px_1fr] sm:gap-6">
@@ -299,7 +291,7 @@ export default function LandingPage() {
               className="mono text-xs uppercase tracking-[0.2em]"
               style={{ color: "rgba(255,255,255,0.75)" }}
             >
-              {t("Instant intelligence setup", "तुरंत शुरू करें")}
+              {t("Free, no credit card", "मुफ़्त, कोई कार्ड नहीं")}
             </p>
             <h2 className="display mx-auto mt-4 max-w-2xl text-3xl sm:text-4xl">
               {t("Ask your first question today.", "आज अपना पहला सवाल पूछें।")}
