@@ -94,14 +94,19 @@ export default function VoiceSession({
     const voice = pickVoice(speakLang);
     if (voice) utter.voice = voice;
     utter.rate = 1.05;
-    utter.onend = () => {
+    // Chrome sometimes never fires onend/onerror; resume listening on our own
+    // so the panel cannot freeze on "Speaking…".
+    let finished = false;
+    const resume = () => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(watchdog);
       setPhaseBoth("listening");
       startListeningSafe();
     };
-    utter.onerror = () => {
-      setPhaseBoth("listening");
-      startListeningSafe();
-    };
+    const watchdog = window.setTimeout(resume, Math.max(5000, text.length * 120));
+    utter.onend = resume;
+    utter.onerror = resume;
     window.speechSynthesis.speak(utter);
   }, []);
 
@@ -175,6 +180,16 @@ export default function VoiceSession({
     [speak, onSearch, t]
   );
 
+  // Keep the effect below free of unstable deps: `onSearch` comes from the
+  // parent as a fresh closure on every render, so any dep on `runTurn` would
+  // tear down and recreate the (already-started) recognizer mid-listen and
+  // freeze the panel on a static "Listening…". Read the latest turn runner
+  // through a ref instead.
+  const tRef = useRef(t);
+  tRef.current = t;
+  const runTurnRef = useRef(runTurn);
+  runTurnRef.current = runTurn;
+
   useEffect(() => {
     if (!supported) return;
     const Ctor = pickRecognitionCtor();
@@ -194,7 +209,7 @@ export default function VoiceSession({
       finalizeRef.current = window.setTimeout(() => {
         setHeard("");
         setLevel(0);
-        void runTurn(final, rec.lang);
+        void runTurnRef.current(final, rec.lang);
       }, 1200);
     };
     rec.onend = () => {
@@ -207,14 +222,28 @@ export default function VoiceSession({
       }
     };
     rec.onerror = (event) => {
-      if (event.error === "not-allowed") {
-        setError(t("Microphone permission denied. Allow the mic and try again.", "माइक की अनुमति नहीं मिली। अनुमति देकर फिर कोशिश करें।"));
+      const code = event.error ?? "";
+      if (code === "not-allowed" || code === "service-not-allowed") {
+        setError(tRef.current("Microphone permission denied. Allow the mic and try again.", "माइक की अनुमति नहीं मिली। अनुमति देकर फिर कोशिश करें।"));
         wantListeningRef.current = false;
+      } else if (code === "audio-capture") {
+        setError(tRef.current("No microphone found. Connect one and try again.", "कोई माइक नहीं मिला। जोड़कर फिर कोशिश करें।"));
+        wantListeningRef.current = false;
+      } else if (code === "network") {
+        setError(tRef.current("Speech service network error. Check your connection.", "स्पीच सर्विस में नेटवर्क गड़बड़ी। कनेक्शन जांचें।"));
       }
+      // "no-speech" / "aborted" are transient; onend restarts listening.
     };
     recRef.current = rec;
+    // If we were listening when a previous recognizer was replaced, keep going.
+    if (wantListeningRef.current && phaseRef.current === "listening") {
+      try {
+        rec.start();
+      } catch {
+        // ignore
+      }
+    }
     return () => {
-      wantListeningRef.current = false;
       if (finalizeRef.current) window.clearTimeout(finalizeRef.current);
       try {
         rec.stop();
@@ -223,7 +252,7 @@ export default function VoiceSession({
       }
       window.speechSynthesis?.cancel();
     };
-  }, [supported, runTurn, lang, t]);
+  }, [supported, lang]);
 
   const begin = () => {
     wantListeningRef.current = true;
@@ -292,7 +321,7 @@ export default function VoiceSession({
 
       {/* Live indicator: bars that move while ekam listens or speaks */}
       <div className="mt-3 flex items-center gap-3" role="status" aria-live="polite">
-        <div className="flex h-6 items-end gap-1" aria-hidden>
+        <div className={`flex h-6 items-end gap-1 ${live ? "animate-pulse" : ""}`} aria-hidden>
           {[0, 1, 2, 3].map((i) => (
             <span
               key={i}
