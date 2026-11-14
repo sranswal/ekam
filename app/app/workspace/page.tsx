@@ -522,6 +522,13 @@ export default function Workspace() {
               >
                 ↓ CSV
               </a>
+              <a
+                href={`/api/queries/${query?.id}/export?format=json`}
+                className="mono flex min-h-[44px] items-center rounded-full px-5 text-sm font-semibold"
+                style={{ border: "1px solid var(--border)", color: "var(--text)" }}
+              >
+                ↓ JSON
+              </a>
             </div>
           </div>
           {filtered.length === 0 ? (

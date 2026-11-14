@@ -9,17 +9,40 @@ function csvCell(value: unknown): string {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-export async function GET(_request: Request, { params }: RouteParams) {
+export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const queryId = Number(id);
   if (!Number.isInteger(queryId)) {
     return Response.json({ error: "invalid id" }, { status: 400 });
   }
+  const format = new URL(request.url).searchParams.get("format") === "json" ? "json" : "csv";
   const rows = await db
     .select()
     .from(listings)
     .where(eq(listings.queryId, queryId))
     .orderBy(asc(listings.id));
+
+  if (format === "json") {
+    const data = rows.map((r) => ({
+      title: r.title,
+      company: r.company,
+      location: r.location,
+      category: r.category,
+      job_type: r.jobType,
+      salary_min: r.salaryMin,
+      salary_max: r.salaryMax,
+      published_at: r.publicationDate,
+      tags: r.tags,
+      source_url: r.sourceUrl,
+    }));
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Disposition": `attachment; filename="ekam-query-${queryId}.json"`,
+      },
+    });
+  }
+
   const header = [
     "title",
     "company",
