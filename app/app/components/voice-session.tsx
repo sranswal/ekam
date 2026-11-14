@@ -1,21 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n";
 
 type VoiceTurn = { role: "user" | "agent"; text: string; lang: string | null };
 
-type ResultsPayload = {
-  prompt: string;
-  status: string;
-  collected: number;
-  kept: number;
-  duplicates: number;
-  flagged: number;
-  error: string | null;
-  top: Array<{ title: string; company: string; location: string | null }>;
-};
-
-type Phase = "idle" | "listening" | "thinking" | "searching" | "speaking";
+type Phase = "idle" | "listening" | "thinking" | "speaking";
 
 type SpeechRecognitionLike = {
   lang: string;
@@ -23,7 +13,7 @@ type SpeechRecognitionLike = {
   interimResults: boolean;
   start: () => void;
   stop: () => void;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string } & { isFinal: boolean }>> }) => void) | null;
   onend: (() => void) | null;
   onerror: ((event: { error?: string }) => void) | null;
 };
@@ -45,13 +35,33 @@ function pickVoice(lang: string): SpeechSynthesisVoice | null {
   return voices.find((v) => v.lang.toLowerCase().startsWith(prefix)) ?? null;
 }
 
-export default function VoiceSession({ onClose }: { onClose: () => void }) {
+const PHASE_LABEL: Record<Phase, string> = {
+  idle: "Tap to start talking",
+  listening: "Listening…",
+  thinking: "Thinking…",
+  speaking: "Speaking…",
+};
+
+// Always-mounted dock: a mic pill when closed, a live conversation panel when open.
+// Search requests go through onSearch so results appear on the workspace screen
+// while the conversation keeps going.
+export default function VoiceSession({
+  open,
+  onOpenChange,
+  onSearch,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSearch: (prompt: string) => void;
+}) {
+  const { t, lang } = useI18n();
   const [supported, setSupported] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
   const [turns, setTurns] = useState<VoiceTurn[]>([]);
   const [heard, setHeard] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
+  const [level, setLevel] = useState(0);
 
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const phaseRef = useRef<Phase>("idle");
@@ -59,6 +69,8 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
   const turnsRef = useRef<VoiceTurn[]>([]);
   const wantListeningRef = useRef(false);
   const finalizeRef = useRef<number | null>(null);
+  const openRef = useRef(open);
+  openRef.current = open;
 
   useEffect(() => {
     setSupported(pickRecognitionCtor() !== null);
@@ -69,7 +81,7 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
     setPhase(p);
   };
 
-  const speak = useCallback((text: string, lang: string) => {
+  const speak = useCallback((text: string, speakLang: string) => {
     if (mutedRef.current || typeof window === "undefined" || !window.speechSynthesis) {
       setPhaseBoth("listening");
       startListeningSafe();
@@ -78,8 +90,8 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
     setPhaseBoth("speaking");
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = lang;
-    const voice = pickVoice(lang);
+    utter.lang = speakLang;
+    const voice = pickVoice(speakLang);
     if (voice) utter.voice = voice;
     utter.rate = 1.05;
     utter.onend = () => {
@@ -107,7 +119,7 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
   }, []);
 
   const runTurn = useCallback(
-    async (userText: string, lang: string, pendingResults?: ResultsPayload) => {
+    async (userText: string, heardLang: string) => {
       wantListeningRef.current = false;
       recRef.current?.stop();
       setPhaseBoth("thinking");
@@ -117,7 +129,7 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
         const res = await fetch("/api/voice/turn", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ history, userText, pendingResults: pendingResults ?? null }),
+          body: JSON.stringify({ history, userText, pendingResults: null }),
         });
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -129,68 +141,30 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
           action: { type: string; prompt: string } | null;
         };
         setTurns((prev) => {
-          const next = [...prev, { role: "user" as const, text: userText, lang }, { role: "agent" as const, text: reply.reply, lang: reply.replyHindi ? "hi-IN" : lang }];
+          const next = [
+            ...prev,
+            { role: "user" as const, text: userText, lang: heardLang },
+            { role: "agent" as const, text: reply.reply, lang: reply.replyHindi ? "hi-IN" : heardLang },
+          ];
           turnsRef.current = next.slice(-24);
           return next;
         });
 
+        wantListeningRef.current = true;
         if (reply.action?.type === "run_query") {
-          setPhaseBoth("searching");
-          const qRes = await fetch("/api/queries", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: reply.action.prompt }),
-          });
-          if (!qRes.ok) {
-            const qData = (await qRes.json().catch(() => ({}))) as { error?: string };
-            throw new Error(qData.error ?? `pipeline ${qRes.status}`);
-          }
-          const qData = (await qRes.json()) as { id: number };
-          const dRes = await fetch(`/api/queries/${qData.id}`, { cache: "no-store" });
-          if (!dRes.ok) throw new Error(`query ${dRes.status}`);
-          const detail = (await dRes.json()) as {
-            query: { prompt: string; status: string; collected: number; kept: number; duplicates: number; flagged: number; error: string | null };
-            listings: Array<{ title: string; company: string; location: string | null }>;
-          };
-          const results: ResultsPayload = {
-            prompt: detail.query.prompt,
-            status: detail.query.status,
-            collected: detail.query.collected,
-            kept: detail.query.kept,
-            duplicates: detail.query.duplicates,
-            flagged: detail.query.flagged,
-            error: detail.query.error,
-            top: detail.listings.slice(0, 3),
-          };
-          // Second brain call: speak the verified results like a person.
-          const speakRes = await fetch("/api/voice/turn", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              history: turnsRef.current,
-              userText: "(pipeline finished, report the result)",
-              pendingResults: results,
-            }),
-          });
-          if (speakRes.ok) {
-            const spoken = (await speakRes.json()) as { reply: string; replyHindi: string | null };
-            setTurns((prev) => {
-              const next = [...prev, { role: "agent" as const, text: spoken.reply, lang: spoken.replyHindi ? "hi-IN" : lang }];
-              turnsRef.current = next.slice(-24);
-              return next;
-            });
-            wantListeningRef.current = true;
-            speak(spoken.replyHindi && lang.startsWith("hi") ? spoken.replyHindi : spoken.reply, spoken.replyHindi && lang.startsWith("hi") ? "hi-IN" : lang);
-            return;
-          }
-          wantListeningRef.current = true;
-          speak(`Done. ${results.kept} verified rows for ${results.prompt}.`, lang);
+          // Results render on the workspace screen; keep talking meanwhile.
+          onSearch(reply.action.prompt);
+          speak(
+            t(
+              `Searching now for ${reply.action.prompt}. Results are on your screen.`,
+              `${reply.action.prompt} के लिए खोज रहा हूं। नतीजे आपकी स्क्रीन पर हैं।`
+            ),
+            heardLang.startsWith("hi") ? "hi-IN" : heardLang
+          );
           return;
         }
-
-        wantListeningRef.current = true;
-        const replyLang = reply.replyHindi && lang.startsWith("hi") ? "hi-IN" : lang;
-        speak(reply.replyHindi && lang.startsWith("hi") ? reply.replyHindi : reply.reply, replyLang);
+        const replyLang = reply.replyHindi && heardLang.startsWith("hi") ? "hi-IN" : heardLang;
+        speak(reply.replyHindi && heardLang.startsWith("hi") ? reply.replyHindi : reply.reply, replyLang);
       } catch (err) {
         const message = err instanceof Error ? err.message : "voice turn failed";
         setError(message);
@@ -198,7 +172,7 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
         speak("Sorry, kuch galat ho gaya. Dobara boliye.", "hi-IN");
       }
     },
-    [speak],
+    [speak, onSearch, t]
   );
 
   useEffect(() => {
@@ -206,26 +180,25 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
     const Ctor = pickRecognitionCtor();
     if (!Ctor) return;
     const rec = new Ctor();
-    rec.lang = "en-IN";
-    rec.continuous = false;
+    rec.lang = lang === "hi" ? "hi-IN" : "en-IN";
+    rec.continuous = true;
     rec.interimResults = true;
     rec.onresult = (event) => {
-      let finalText = "";
-      for (let i = 0; i < event.results.length; i++) {
-        finalText += event.results[i][0].transcript;
-      }
-      setHeard(finalText);
-      // Restart a quiet timer: 1.2s after the last result, finalize the turn.
+      let text = "";
+      for (let i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
+      setHeard(text);
+      setLevel(2 + ((text.length * 7) % 6)); // cheap live-motion tick while words stream in
       if (finalizeRef.current) window.clearTimeout(finalizeRef.current);
-      const text = finalText.trim();
-      if (!text) return;
+      const final = text.trim();
+      if (!final) return;
       finalizeRef.current = window.setTimeout(() => {
         setHeard("");
-        void runTurn(text, rec.lang);
+        setLevel(0);
+        void runTurn(final, rec.lang);
       }, 1200);
     };
     rec.onend = () => {
-      if (wantListeningRef.current && phaseRef.current !== "speaking" && phaseRef.current !== "thinking" && phaseRef.current !== "searching") {
+      if (wantListeningRef.current && phaseRef.current === "listening") {
         try {
           rec.start();
         } catch {
@@ -235,7 +208,7 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
     };
     rec.onerror = (event) => {
       if (event.error === "not-allowed") {
-        setError("Microphone permission denied. Allow the mic and try again.");
+        setError(t("Microphone permission denied. Allow the mic and try again.", "माइक की अनुमति नहीं मिली। अनुमति देकर फिर कोशिश करें।"));
         wantListeningRef.current = false;
       }
     };
@@ -250,7 +223,7 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
       }
       window.speechSynthesis?.cancel();
     };
-  }, [supported, runTurn]);
+  }, [supported, runTurn, lang, t]);
 
   const begin = () => {
     wantListeningRef.current = true;
@@ -258,90 +231,132 @@ export default function VoiceSession({ onClose }: { onClose: () => void }) {
     startListeningSafe();
   };
 
+  const pause = () => {
+    wantListeningRef.current = false;
+    recRef.current?.stop();
+    setPhaseBoth("idle");
+  };
+
   const interrupt = () => {
-    // Barge-in: stop speaking, resume listening.
     window.speechSynthesis?.cancel();
     wantListeningRef.current = true;
     setPhaseBoth("listening");
     startListeningSafe();
   };
 
-  const end = () => {
-    wantListeningRef.current = false;
-    window.speechSynthesis?.cancel();
-    recRef.current?.stop();
-    setPhaseBoth("idle");
-    onClose();
-  };
+  // Closed state: floating mic pill, always reachable.
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenChange(true)}
+        aria-label={t("Talk to ekam", "ekam से बात करें")}
+        className="fixed bottom-5 right-5 z-40 flex min-h-[44px] items-center gap-2 rounded-full px-4 text-sm font-semibold shadow-lg transition hover:scale-105"
+        style={{ background: "var(--accent)", color: "var(--bg)", boxShadow: "var(--shadow-2)" }}
+      >
+        <span aria-hidden className={phase !== "idle" ? "animate-pulse" : ""}>◉</span>
+        {t("Talk to ekam", "ekam से बात करें")}
+      </button>
+    );
+  }
 
   if (!supported) {
     return (
-      <div className="card" style={{ padding: 20 }}>
-        <p>Voice mode needs Chrome, Edge or another Chromium browser with microphone access.</p>
-        <button className="btn" onClick={onClose}>
-          Back to typing
+      <div className="card fixed bottom-5 right-5 z-40 max-w-xs" style={{ padding: 16 }}>
+        <p>{t("Voice mode needs Chrome, Edge or another Chromium browser with microphone access.", "वॉइस मोड के लिए Chrome/Edge और माइक चाहिए।")}</p>
+        <button className="btn mt-2" onClick={() => onOpenChange(false)}>
+          {t("Back to typing", "टाइपिंग पर वापस")}
         </button>
       </div>
     );
   }
 
+  const live = phase === "listening" || phase === "speaking";
+
   return (
-    <section aria-label="Voice conversation" className="card" style={{ display: "flex", flexDirection: "column", gap: 12, padding: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <strong>ekam voice</strong>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn btn-ghost" onClick={() => { mutedRef.current = !mutedRef.current; setMuted(mutedRef.current); }}>
-            {muted ? "Unmute" : "Mute"}
-          </button>
-          <button className="btn btn-ghost" onClick={end}>
-            End
-          </button>
-        </div>
+    <section
+      aria-label={t("Voice conversation with ekam", "ekam से वॉइस बातचीत")}
+      className="card fixed bottom-5 right-5 z-40 w-[min(92vw,380px)]"
+      style={{ padding: 16, boxShadow: "var(--shadow-2)" }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <strong className="mono text-sm">{t("ekam is live", "ekam लाइव है")}</strong>
+        <button
+          className="btn btn-ghost min-h-[36px] text-xs"
+          aria-label={t("Close voice panel", "वॉइस पैनल बंद करें")}
+          onClick={() => (phase === "idle" ? onOpenChange(false) : pause())}
+        >
+          {t("Minimize", "छोटा करें")}
+        </button>
       </div>
 
-      <p className="mono text-xs" style={{ color: "var(--muted)" }} role="status">
-        {phase === "idle" && "Tap the mic and just talk."}
-        {phase === "listening" && "Listening…"}
-        {phase === "thinking" && "Thinking…"}
-        {phase === "searching" && "Searching verified sources…"}
-        {phase === "speaking" && "Speaking… (tap to interrupt)"}
-      </p>
+      {/* Live indicator: bars that move while ekam listens or speaks */}
+      <div className="mt-3 flex items-center gap-3" role="status" aria-live="polite">
+        <div className="flex h-6 items-end gap-1" aria-hidden>
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={i}
+              className="w-1 rounded-full transition-all duration-200"
+              style={{
+                background: live ? "var(--accent)" : "var(--muted)",
+                height: live ? `${6 + ((level * (i + 2) + i * 5) % 18)}px` : "4px",
+              }}
+            />
+          ))}
+        </div>
+        <p className="mono text-xs" style={{ color: "var(--muted)" }}>
+          {phase === "idle" ? t("Tap Start talking", "शुरू करने के लिए दबाएं") : t(PHASE_LABEL[phase], PHASE_LABEL[phase])}
+          {muted ? ` · ${t("muted", "म्यूट")}` : ""}
+        </p>
+      </div>
 
       {heard && (
-        <p style={{ fontStyle: "italic" }}>&ldquo;{heard}&rdquo;</p>
+        <p className="mt-2 text-sm italic" style={{ color: "var(--text)" }}>
+          &ldquo;{heard}&rdquo;
+        </p>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 300, overflowY: "auto" }}>
-        {turns.map((t, i) => (
+      <div className="mt-2 flex max-h-48 flex-col gap-2 overflow-y-auto text-sm">
+        {turns.slice(-6).map((turn, i) => (
           <p
             key={i}
-            style={{
-              textAlign: t.role === "user" ? "right" : "left",
-              margin: 0,
-              color: t.role === "user" ? "var(--fg)" : "var(--muted)",
-            }}
+            className="m-0"
+            style={{ textAlign: turn.role === "user" ? "right" : "left", color: turn.role === "user" ? "var(--text)" : "var(--muted)" }}
           >
-            <strong>{t.role === "user" ? "You" : "ekam"}:</strong> {t.text}
+            <strong>{turn.role === "user" ? t("You", "आप") : "ekam"}:</strong> {turn.text}
           </p>
         ))}
       </div>
 
-      {error && <p style={{ color: "var(--danger)" }}>{error}</p>}
+      {error && (
+        <p role="alert" className="mt-2 text-xs" style={{ color: "var(--danger)" }}>
+          {error}
+        </p>
+      )}
 
-      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
         {phase === "speaking" ? (
-          <button className="btn" onClick={interrupt} style={{ minWidth: 140 }}>
-            Interrupt
+          <button className="btn min-h-[44px] flex-1" onClick={interrupt}>
+            {t("Interrupt", "बीच में बोलें")}
           </button>
         ) : phase === "listening" ? (
-          <button className="btn" onClick={() => { wantListeningRef.current = false; recRef.current?.stop(); setPhaseBoth("idle"); }} style={{ minWidth: 140 }}>
-            Pause
+          <button className="btn min-h-[44px] flex-1" onClick={pause}>
+            {t("Pause", "रोकें")}
           </button>
         ) : (
-          <button className="btn" onClick={begin} style={{ minWidth: 140 }}>
-            {phase === "idle" ? "Start talking" : "Wait…"}
+          <button className="btn btn-primary min-h-[44px] flex-1" onClick={begin}>
+            {t("Start talking", "बात शुरू करें")}
           </button>
         )}
+        <button
+          className="btn btn-ghost min-h-[44px]"
+          onClick={() => {
+            mutedRef.current = !mutedRef.current;
+            setMuted(mutedRef.current);
+          }}
+        >
+          {muted ? t("Unmute", "अनम्यूट") : t("Mute", "म्यूट")}
+        </button>
       </div>
     </section>
   );

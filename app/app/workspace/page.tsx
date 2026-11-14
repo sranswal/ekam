@@ -243,30 +243,15 @@ export default function Workspace() {
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
-      {voiceOpen && (
-        <div
-          role="dialog"
-          aria-label="Voice conversation"
-          style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(0,0,0,0.5)", padding: 16 }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setVoiceOpen(false);
-          }}
-        >
-          <div style={{ width: "100%", maxWidth: 480, marginBottom: 24 }}>
-            <VoiceSession onClose={() => setVoiceOpen(false)} />
-          </div>
-        </div>
-      )}
+      <VoiceSession
+        open={voiceOpen}
+        onOpenChange={setVoiceOpen}
+        onSearch={(p) => void runQuery(p)}
+      />
       {/* Header */}
       <header className="mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p
-              className="mono text-xs tracking-widest uppercase"
-              style={{ color: "var(--accent)" }}
-            >
-              AI Data Intelligence · PS1
-            </p>
             <h1 className="mono mt-2 text-2xl font-bold leading-tight sm:text-4xl" style={{ color: "var(--text)" }}>
               {greeting}
             </h1>
@@ -327,7 +312,7 @@ export default function Workspace() {
               disabled={running || !prompt.trim()}
               className="btn-primary flex min-h-[44px] items-center rounded-full px-6 text-sm font-semibold disabled:opacity-50"
             >
-              {running ? t("Running…", "चल रहा है…") : t("Run Pipeline", "पाइपलाइन चलाएं")}
+              {running ? t("Searching…", "खोज रहा है…") : t("Search", "खोजें")}
             </button>
           </div>
         </form>

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { profiles } from "@/db/schema";
 import { getSessionUser } from "@/lib/auth";
+import { sanitizePersonaData } from "@/lib/persona";
 
 const MAX_RESUME_CHARS = 20_000;
 
@@ -13,6 +14,7 @@ export async function GET() {
 }
 
 type Body = {
+  personaData?: unknown;
   headline?: string;
   skills?: string;
   preferredCity?: string;
@@ -29,16 +31,22 @@ export async function PUT(request: Request) {
   } catch {
     return Response.json({ error: "invalid JSON body" }, { status: 400 });
   }
+
+  const personaData = sanitizePersonaData(body.personaData);
   const resumeText = (body.resumeText ?? "").slice(0, MAX_RESUME_CHARS);
   if (resumeText && resumeText.length < 40) {
     return Response.json({ error: "resume text looks too short to be a resume" }, { status: 400 });
   }
+
+  // Legacy jobseeker fields stay in their own columns so the pipeline and
+  // voice agent can read them without parsing jsonb.
   const values = {
-    headline: body.headline?.slice(0, 200) ?? null,
-    skills: body.skills?.slice(0, 500) ?? null,
-    preferredCity: body.preferredCity?.slice(0, 100) ?? null,
+    headline: (personaData.headline ?? body.headline ?? "").slice(0, 200) || null,
+    skills: (personaData.skills ?? body.skills ?? "").slice(0, 500) || null,
+    preferredCity: (personaData.preferredCity ?? body.preferredCity ?? "").slice(0, 100) || null,
     resumeText: resumeText || null,
     resumeFileName: body.resumeFileName?.slice(0, 200) ?? null,
+    data: personaData,
     updatedAt: new Date(),
   };
   const [profile] = await db

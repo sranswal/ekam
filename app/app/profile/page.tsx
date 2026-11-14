@@ -2,14 +2,15 @@
 
 import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { PERSONAS } from "@/lib/brand";
+import Link from "next/link";
+import { PERSONAS, type PersonaId } from "@/lib/brand";
+import { PERSONA_FIELDS, RESUME_PERSONAS } from "@/lib/persona";
 import { useI18n } from "@/lib/i18n";
 import AuthHeader from "../components/auth-header";
+import DictationButton from "../components/dictation-button";
 
 type Profile = {
-  headline: string | null;
-  skills: string | null;
-  preferredCity: string | null;
+  data: Record<string, string>;
   resumeText: string | null;
   resumeFileName: string | null;
 };
@@ -22,13 +23,7 @@ export default function ProfilePage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<Profile>({
-    headline: "",
-    skills: "",
-    preferredCity: "",
-    resumeText: "",
-    resumeFileName: null,
-  });
+  const [profile, setProfile] = useState<Profile>({ data: {}, resumeText: "", resumeFileName: null });
   const [fileName, setFileName] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -36,15 +31,7 @@ export default function ProfilePage() {
   useEffect(() => {
     (async () => {
       try {
-        let res = await fetch("/api/auth");
-        if (!res.ok && res.status !== 401) {
-          // fallback for builds where GET /api/auth is not implemented yet
-          res = await fetch("/api/auth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "me" }),
-          });
-        }
+        const res = await fetch("/api/auth");
         if (res.status === 401) {
           router.replace("/login");
           return;
@@ -68,8 +55,10 @@ export default function ProfilePage() {
     })();
   }, [router]);
 
-  const persona = PERSONAS.find((p) => p.id === authUser?.persona) ?? null;
+  const personaId = (authUser?.persona ?? null) as PersonaId | null;
+  const persona = PERSONAS.find((p) => p.id === personaId) ?? null;
   const personaLabel = persona ? t(persona.label, persona.hi) : null;
+  const fields = personaId ? PERSONA_FIELDS[personaId] : [];
 
   useEffect(() => {
     if (!authReady || !authUser) return;
@@ -80,25 +69,40 @@ export default function ProfilePage() {
           router.replace("/login");
           return;
         }
-        const data = (await res.json()) as { profile: Profile | null };
+        const data = (await res.json()) as { profile: (Profile & { headline?: string | null; skills?: string | null; preferredCity?: string | null }) | null };
         if (data.profile) {
-          setProfile({
-            headline: data.profile.headline ?? "",
-            skills: data.profile.skills ?? "",
-            preferredCity: data.profile.preferredCity ?? "",
-            resumeText: data.profile.resumeText ?? "",
-            resumeFileName: data.profile.resumeFileName,
-          });
+          const data_ = { ...(data.profile.data ?? {}) };
+          // profiles saved before persona-specific forms exist
+          for (const key of ["headline", "skills", "preferredCity"] as const) {
+            const legacy = data.profile[key as keyof typeof data.profile] as string | null | undefined;
+            if (legacy && !data_[key]) data_[key] = legacy;
+          }
+          setProfile({ data: data_, resumeText: data.profile.resumeText ?? "", resumeFileName: data.profile.resumeFileName });
           setFileName(data.profile.resumeFileName);
         }
       } catch {
-        setError("could not load profile");
+        setError(t("could not load profile", "प्रोफ़ाइल लोड नहीं हुई"));
         setStatus("error");
       } finally {
         setLoading(false);
       }
     })();
-  }, [authReady, authUser, router]);
+  }, [authReady, authUser, router, t]);
+
+  function setField(key: string, value: string) {
+    setProfile((p) => ({ ...p, data: { ...p.data, [key]: value } }));
+    setStatus("idle");
+  }
+
+  async function switchPersona(next: string) {
+    await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ persona: next }),
+    });
+    router.refresh();
+    window.location.reload();
+  }
 
   function onFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -131,7 +135,11 @@ export default function ProfilePage() {
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...profile, resumeFileName: fileName }),
+        body: JSON.stringify({
+          personaData: profile.data,
+          resumeText: profile.resumeText,
+          resumeFileName: fileName,
+        }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
@@ -165,16 +173,24 @@ export default function ProfilePage() {
     border: "1px solid var(--border)",
     color: "var(--text)",
   };
+  const showResume = personaId !== null && RESUME_PERSONAS.includes(personaId);
 
   return (
     <main className="min-h-dvh px-4 py-10" style={{ background: "var(--bg)", color: "var(--text)" }}>
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-mono text-2xl tracking-tight" style={{ color: "var(--text)" }}>
-            {t("Your profile", "आपकी प्रोफ़ाइल")}
-          </h1>
+          <Link
+            href="/workspace"
+            className="inline-flex min-h-11 items-center gap-2 rounded px-2 text-sm transition hover:opacity-80"
+            style={{ color: "var(--accent)" }}
+          >
+            <span aria-hidden>←</span> {t("Back to search", "खोज पर वापस")}
+          </Link>
           <AuthHeader />
         </div>
+        <h1 className="font-mono text-2xl tracking-tight" style={{ color: "var(--text)" }}>
+          {t("Your profile", "आपकी प्रोफ़ाइल")}
+        </h1>
         {personaLabel && (
           <p
             className="mono mt-3 inline-flex items-center rounded px-2 py-1 text-xs tracking-widest uppercase"
@@ -183,10 +199,26 @@ export default function ProfilePage() {
             {personaLabel}
           </p>
         )}
+        <label className="mt-3 flex items-center gap-2 text-sm" style={{ color: "var(--muted)" }}>
+          {t("Not you? Switch:", "आप नहीं? बदलें:")}
+          <select
+            value={personaId ?? ""}
+            onChange={(e) => switchPersona(e.target.value)}
+            className="min-h-11 rounded px-2 py-1 text-sm"
+            style={fieldStyle}
+          >
+            {PERSONAS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {t(p.label, p.hi)}
+              </option>
+            ))}
+          </select>
+        </label>
         <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+          {persona?.blurb}{" "}
           {t(
-            "Your resume shapes future searches and the voice agent's questions.",
-            "आपका रिज़ूमे आगे की खोजों और वॉइस एजेंट के सवालों को आकार देता है।"
+            "Tap the mic next to any field to fill it by speaking.",
+            "किसी भी खाने के पास माइक दबाकर बोलकर भरें।"
           )}
         </p>
         <form
@@ -194,63 +226,59 @@ export default function ProfilePage() {
           className="mt-6 space-y-5 rounded-lg p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)" }}
         >
-          <label className="block text-sm" style={{ color: "var(--muted)" }}>
-            {t("Headline", "हेडलाइन")}
-            <input
-              value={profile.headline ?? ""}
-              onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-              placeholder={t("Backend developer, 3 years, Node + Postgres", "बैकएंड डेवलपर, 3 साल, Node + Postgres")}
-              className={field}
-              style={fieldStyle}
-            />
-          </label>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              {t("Skills (comma separated)", "कौशल (कॉमा से अलग)")}
-              <input
-                value={profile.skills ?? ""}
-                onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
-                placeholder="node, react, sql"
-                className={field}
-                style={fieldStyle}
-              />
-            </label>
-            <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              {t("Preferred city", "पसंदीदा शहर")}
-              <input
-                value={profile.preferredCity ?? ""}
-                onChange={(e) => setProfile({ ...profile, preferredCity: e.target.value })}
-                placeholder="Noida"
-                className={field}
-                style={fieldStyle}
-              />
-            </label>
-          </div>
-          <div className="text-sm" style={{ color: "var(--muted)" }}>
-            {t("Resume", "रिज़ूमे")}
-            <div className="mt-1 flex flex-wrap items-center gap-3">
-              <label
-                className="inline-flex min-h-11 cursor-pointer items-center rounded px-4 leading-6 transition focus-within:outline focus-within:outline-2 focus-within:outline-[--accent]"
-                style={{ border: "1px solid var(--border)", color: "var(--text)" }}
-              >
-                {t("Upload file (.txt / .md / .csv)", "फ़ाइल अपलोड करें (.txt / .md / .csv)")}
-                <input type="file" accept=".txt,.md,.csv,text/plain" onChange={onFile} className="sr-only" />
-              </label>
-              {fileName && (
-                <span style={{ color: "var(--accent)" }}>
-                  {t(`${fileName} loaded`, `${fileName} लोड हुआ`)}
-                </span>
+          {fields.map((f) => (
+            <label key={f.key} className="block text-sm" style={{ color: "var(--muted)" }}>
+              <span className="flex items-center justify-between gap-2">
+                <span>{t(f.labelEn, f.labelHi)}</span>
+                <DictationButton onText={(text) => setField(f.key, text)} />
+              </span>
+              {f.textarea ? (
+                <textarea
+                  value={profile.data[f.key] ?? ""}
+                  onChange={(e) => setField(f.key, e.target.value)}
+                  rows={3}
+                  placeholder={t(f.placeholderEn, f.placeholderHi)}
+                  className={field}
+                  style={fieldStyle}
+                />
+              ) : (
+                <input
+                  value={profile.data[f.key] ?? ""}
+                  onChange={(e) => setField(f.key, e.target.value)}
+                  placeholder={t(f.placeholderEn, f.placeholderHi)}
+                  className={field}
+                  style={fieldStyle}
+                />
               )}
+            </label>
+          ))}
+          {showResume && (
+            <div className="text-sm" style={{ color: "var(--muted)" }}>
+              {t("Resume", "रिज़ूमे")}
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <label
+                  className="inline-flex min-h-11 cursor-pointer items-center rounded px-4 leading-6 transition focus-within:outline focus-within:outline-2 focus-within:outline-[--accent]"
+                  style={{ border: "1px solid var(--border)", color: "var(--text)" }}
+                >
+                  {t("Upload file (.txt / .md / .csv)", "फ़ाइल अपलोड करें (.txt / .md / .csv)")}
+                  <input type="file" accept=".txt,.md,.csv,text/plain" onChange={onFile} className="sr-only" />
+                </label>
+                {fileName && (
+                  <span style={{ color: "var(--accent)" }}>
+                    {t(`${fileName} loaded`, `${fileName} लोड हुआ`)}
+                  </span>
+                )}
+              </div>
+              <textarea
+                value={profile.resumeText ?? ""}
+                onChange={(e) => setProfile((p) => ({ ...p, resumeText: e.target.value }))}
+                rows={12}
+                placeholder={t("…or paste your resume / profile text here", "…या अपना रिज़ूमे यहां पेस्ट करें")}
+                className={`${field} mt-3 font-mono text-xs leading-5`}
+                style={fieldStyle}
+              />
             </div>
-            <textarea
-              value={profile.resumeText ?? ""}
-              onChange={(e) => setProfile({ ...profile, resumeText: e.target.value })}
-              rows={12}
-              placeholder={t("…or paste your resume / profile text here", "…या अपना रिज़ूमे यहां पेस्ट करें")}
-              className={`${field} mt-3 font-mono text-xs leading-5`}
-              style={fieldStyle}
-            />
-          </div>
+          )}
           {error && (
             <p
               role="alert"

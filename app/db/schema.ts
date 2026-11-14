@@ -46,6 +46,7 @@ export const profiles = pgTable(
     preferredCity: text("preferred_city"),
     resumeText: text("resume_text"),
     resumeFileName: text("resume_file_name"),
+    data: jsonb("data").$type<Record<string, string>>().notNull().default({}),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
 );
