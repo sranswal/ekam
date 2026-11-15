@@ -8,7 +8,7 @@ type Body = { action?: string; email?: string; name?: string; password?: string;
 
 export async function GET() {
   const user = await getSessionUser();
-  if (!user) return Response.json({ error: "not signed in" }, { status: 401 });
+  if (!user) return Response.json({ user: null });
   return Response.json({
     user: { id: user.id, email: user.email, name: user.name, persona: user.persona, onboardedAt: user.onboardedAt },
   });

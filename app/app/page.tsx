@@ -324,6 +324,43 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Demo video */}
+        <section className="mx-auto w-full max-w-5xl px-5 py-16">
+          <p className="mono text-center text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+            {t("Demo", "डेमो")}
+          </p>
+          <h2 className="display mt-3 text-center text-2xl sm:text-3xl">
+            {t("See ekam in action.", "देखिए ekam कैसे काम करता है।")}
+          </h2>
+          <div
+            className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-2xl border border-[var(--border)]"
+            style={{ boxShadow: "var(--shadow-2)" }}
+          >
+            <video
+              controls
+              preload="metadata"
+              poster="/ekam_logo.png"
+              className="block w-full bg-black"
+              aria-label={t(
+                "ekam product demo video",
+                "ekam प्रोडक्ट डेमो वीडियो",
+              )}
+            >
+              <source src="/demo.mp4" type="video/mp4" />
+              {t(
+                "Your browser does not support embedded video.",
+                "आपका ब्राउज़र वीडियो चलाने का समर्थन नहीं करता।",
+              )}
+            </video>
+          </div>
+          <p className="mt-3 text-center text-xs text-[var(--muted)]">
+            {t(
+              "A real query, end to end — asked, searched, verified and exported.",
+              "एक असली सवाल, शुरू से अंत तक — पूछा, खोजा, जाँचा और एक्सपोर्ट किया।",
+            )}
+          </p>
+        </section>
       </main>
 
       {/* Footer */}

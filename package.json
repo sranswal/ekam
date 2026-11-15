@@ -1,0 +1,10 @@
+{
+  "name": "ekam",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix app",
+    "start": "npm run start --prefix app",
+    "build": "npm run build --prefix app",
+    "test": "npm test --prefix app"
+  }
+}

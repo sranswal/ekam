@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/ekam-logo.png" alt="ekam" width="320" />
+  <img src="app/public/ekam_logo.png" alt="ekam" width="320" />
 </p>
 
 <h3 align="center">ask in plain words, get verified answers - all in one</h3>
@@ -18,30 +18,55 @@ and get back verified, source-linked answers you can export.
 
 One place to ask, verify and export: all in one.
 
+## Demo
+
+Watch the 40-second product demo ([docs/demo.mp4](docs/demo.mp4) - also embedded right on the
+landing page): a real query asked, searched, verified and exported, end to end.
+
+<details>
+<summary>What you'll see</summary>
+
+1. Landing page → "Ask. Get answers."
+2. A query typed into the workspace ask bar: *remote react developer jobs*
+3. The pipeline runs - interpret, fetch, verify (the honest "Searching verified sources…" wait included)
+4. The results dashboard: verified / duplicates / flagged stat cards, every row with its source
+5. One-click CSV / JSON export
+
+</details>
+
 ## Features
 
 - 🗣️ **Ask in plain language** - a single question bar interprets English and Hinglish queries
   and extracts topic, role, location and keywords. No forms, no filters, no boolean syntax.
 - ✅ **Verify before you trust** - every result carries its source, so answers are checkable,
-  not guessed.
+  not guessed. The LLM only parses intent; the answers come from fetched source records, so
+  ekam structurally can't invent a row.
 - 🧭 **Built for four people** - at signup you pick a path (job seeker, student, SME / founder,
   agency) and the workspace adapts to it.
 - 🌐 **Bilingual by design** - English and Hindi are first-class across the whole product.
 - 🌗 **Light and dark** - theme switcher on the landing page, remembered across sessions.
 - 📤 **Export** - clean, source-linked results as CSV or JSON.
 
-## How it works
+## User journey
 
 ```mermaid
 flowchart TD
     A[Landing page<br>EN / HI · light / dark · Get Started] --> B[Auth overlay<br>sign in / sign up]
     B --> C[Onboarding<br>pick your path: job seeker · student · SME · agency]
     C --> D[Workspace ask bar<br>text + voice, English or Hinglish]
-    D --> E[Interpret<br>Gemini + deterministic fallback]
-    E --> F[Fetch<br>live sources for the vertical]
-    F --> G[Verify & rank<br>dedupe · source trust · freshness]
-    G --> H[Verified results<br>every row shows its source]
-    H --> I[Export CSV / JSON<br>+ unique query history]
+    D --> E{{Verified results<br>every row shows its source}}
+    E --> F[Export CSV / JSON<br>+ unique query history]
+```
+
+## How a query flows through ekam
+
+```mermaid
+flowchart LR
+    Q[Ask bar<br>text or voice] --> I[Interpret<br>Gemini, with deterministic<br>regex fallback]
+    I --> F[Fetch<br>live sources for the vertical]
+    F --> V[Verify & rank<br>dedupe · source link · freshness]
+    V --> R[(Results<br>source-linked rows)]
+    R --> X[Export<br>CSV / JSON]
 ```
 
 1. **Landing page** - what ekam does, who it is for. Language (EN/HI), theme (light/dark) and a
@@ -80,9 +105,11 @@ npm start
 
 ## Configuration
 
-| Variable       | Required | Description                  |
-| -------------- | -------- | ---------------------------- |
-| `DATABASE_URL` | yes      | PostgreSQL connection string |
+| Variable          | Required | Description                                                                                      |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`    | yes      | PostgreSQL connection string                                                                      |
+| `GEMINI_API_KEY`  | no       | Google Gemini API key, used for intent interpretation. Without it, a deterministic regex fallback is used |
+| `SERPAPI_API_KEY` | no       | SerpAPI key, used for some source fetches. Queries that need it return fewer rows without it        |
 
 ## Project structure
 
@@ -108,17 +135,17 @@ app/
 - [ ] Saved searches and alerts
 - [ ] Source-trust scores per publisher, regional languages beyond Hindi
 
-See [PLAN.md](PLAN.md) for the full product plan - the problem, the personas and the build order.
-
 ## Contributing
 
-Contributions are welcome! This is an early-stage project, so the easiest ways to help right now:
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the short version: fork,
+branch from `main`, make your change, run `npm run build`, open a pull request.
 
-1. Fork the repo and create your branch from `main`.
-2. Run `npm install && npm run dev` inside `app/` and make your change.
-3. Run `npm run build` to make sure it type-checks and builds.
-4. Open a pull request describing what changed and why.
+By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
 Released under the [MIT License](LICENSE).
+
+---
+
+<p align="center"><em>Built with <a href="https://ml.ai">ML.ai</a> at InfraShift · hackathon by <a href="https://infrasity.com">Infrasity</a> and <a href="https://geekroom.tech">Geek Room</a></em></p>
