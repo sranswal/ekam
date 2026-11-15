@@ -5,6 +5,7 @@
     "dev": "npm run dev --prefix app",
     "start": "npm run start --prefix app",
     "build": "npm run build --prefix app",
-    "test": "npm test --prefix app"
+    "test": "npm test --prefix app",
+    "test:voice": "npm run test:voice --prefix app"
   }
 }

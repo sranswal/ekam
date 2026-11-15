@@ -1,151 +1,195 @@
 <p align="center">
-  <img src="app/public/ekam_logo.png" alt="ekam" width="320" />
+  <img src="app/public/ekam_logo.png" alt="ekam" width="340" />
 </p>
 
-<h3 align="center">ask in plain words, get verified answers - all in one</h3>
+<h3 align="center">Ask in plain words, get verified answers — all in one.</h3>
 
 <p align="center">
   <a href="#license"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green.svg"></a>
-  <a href="https://nextjs.org"><img alt="Next.js" src="https://img.shields.io/badge/Next.js-black?logo=next.js"></a>
-  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white"></a>
-  <a href="https://orm.drizzle.team"><img alt="Drizzle" src="https://img.shields.io/badge/Drizzle-C5F74F?logo=drizzle&logoColor=black"></a>
+  <a href="https://nextjs.org"><img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-black?logo=next.js"></a>
+  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white"></a>
+  <a href="https://orm.drizzle.team"><img alt="Drizzle" src="https://img.shields.io/badge/Drizzle-ORM-C5F74F?logo=drizzle&logoColor=black"></a>
+  <a href="https://ai.google.dev"><img alt="Google Gemini" src="https://img.shields.io/badge/Gemini-2.5_Flash-8E75B2?logo=google"></a>
   <a href="https://github.com/sranswal/ekam/pulls"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"></a>
 </p>
 
-**ekam** (Sanskrit: *one*) is a verified-opportunity finder. Ask in your own words - typed or
-spoken, English or Hindi ("mujhe Noida mein flat dikhao", "AI developer jobs in Bengaluru") -
-and get back verified, source-linked answers you can export.
+<p align="center">
+  <a href="#product-walkthrough">Product Demo</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#features">Features</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#configuration">Configuration</a> •
+  <a href="#roadmap">Roadmap</a>
+</p>
 
-One place to ask, verify and export: all in one.
+---
 
-## Demo
+**ekam** (Sanskrit: *एकम्* — *the one*) is a verified-opportunity search engine and conversational agent for India. Ask questions in natural human language — typed or spoken, English, Hindi, or Hinglish (*"AI developer jobs in Bengaluru"*, *"मुझे Noida में 2BHK flat दिखाओ"*, *"Show IT supply tenders in Delhi"*) — and get back structured, deduplicated, source-linked results you can immediately verify and export.
 
-Watch the 40-second product demo ([docs/demo.mp4](docs/demo.mp4) - also embedded right on the
-landing page): a real query asked, searched, verified and exported, end to end.
+No complex search filters. No hallucinations. **Every result links directly to its live verified source.**
 
-<details>
-<summary>What you'll see</summary>
+---
 
-1. Landing page → "Ask. Get answers."
-2. A query typed into the workspace ask bar: *remote react developer jobs*
-3. The pipeline runs - interpret, fetch, verify (the honest "Searching verified sources…" wait included)
-4. The results dashboard: verified / duplicates / flagged stat cards, every row with its source
-5. One-click CSV / JSON export
+## Product Walkthrough
 
-</details>
+<p align="center">
+  <img src="docs/demo.gif" alt="ekam live product walkthrough" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);" />
+</p>
 
-## Features
+Watch the complete query lifecycle: ask in natural language → intent extraction → live source retrieval & deduplication → verified dashboard → one-click CSV / JSON export.
 
-- 🗣️ **Ask in plain language** - a single question bar interprets English and Hinglish queries
-  and extracts topic, role, location and keywords. No forms, no filters, no boolean syntax.
-- ✅ **Verify before you trust** - every result carries its source, so answers are checkable,
-  not guessed. The LLM only parses intent; the answers come from fetched source records, so
-  ekam structurally can't invent a row.
-- 🧭 **Built for four people** - at signup you pick a path (job seeker, student, SME / founder,
-  agency) and the workspace adapts to it.
-- 🌐 **Bilingual by design** - English and Hindi are first-class across the whole product.
-- 🌗 **Light and dark** - theme switcher on the landing page, remembered across sessions.
-- 📤 **Export** - clean, source-linked results as CSV or JSON.
+*(A full HD MP4 recording is also available at [`docs/demo.mp4`](docs/demo.mp4) and embedded on the web app.)*
 
-## User journey
+---
+
+## Key Features
+
+- 🗣️ **Conversational Voice & Dictation** — Talk naturally with ekam via the continuous-turn voice dock or use voice dictation in profile forms. Supports English, Hindi, and Hinglish.
+- 🎯 **Bilingual Intent Understanding** — Interprets colloquial and code-mixed prompts (extracts target role, vertical, location, recency, and keywords) via Google Gemini with instant deterministic regex fallback.
+- 🛡️ **Zero Hallucination Guarantee** — LLMs only interpret the query. Results are fetched strictly from verified live APIs (Remotive, SerpApi, public registries). ekam structurally cannot fabricate a row.
+- 🧭 **Tailored for 4 Personas** — Dedicated onboarding and workspace adaptations for **Job Seekers**, **Students & Interns**, **SMEs / Founders**, and **Recruitment Agencies**.
+- ⚡ **Instant Verification & Dedupe** — Automatically eliminates duplicate listings across sources, filters incomplete postings, and flags suspicious entries.
+- 📤 **Export Formats** — One-click export to clean CSV and JSON datasets.
+- 🌓 **First-Class Theming & Accessibility** — System-aware dark and light modes, bilingual UI switching (EN / हिंदी), and responsive layouts.
+
+---
+
+## Architecture
+
+ekam splits interpretation from execution to guarantee accuracy and eliminate hallucinations:
 
 ```mermaid
 flowchart TD
-    A[Landing page<br>EN / HI · light / dark · Get Started] --> B[Auth overlay<br>sign in / sign up]
-    B --> C[Onboarding<br>pick your path: job seeker · student · SME · agency]
-    C --> D[Workspace ask bar<br>text + voice, English or Hinglish]
-    D --> E{{Verified results<br>every row shows its source}}
-    E --> F[Export CSV / JSON<br>+ unique query history]
+    subgraph Input ["1. User Interaction"]
+        UI_Text["⌨️ Ask Bar (Text)"]
+        UI_Voice["🎙️ Conversational Voice Agent"]
+        UI_Dict["🗣️ Voice Dictation"]
+    end
+
+    subgraph Intelligence ["2. Query Interpretation"]
+        LLM["Gemini 2.5 Flash Engine"]
+        Fallback["Deterministic Regex Fallback"]
+        Intent["Parsed Intent<br/>Vertical · Role · City · Keywords · Language"]
+    end
+
+    subgraph Retrieval ["3. Live Verified Fetching"]
+        Remotive["Remotive API<br/>(Jobs & Tech Roles)"]
+        Serp["Google SERP API<br/>(Properties, Tenders, Events)"]
+    end
+
+    subgraph Processing ["4. Verification & Normalization Engine"]
+        Dedupe["Deduplication Engine<br/>Hash & Similarity Match"]
+        Verify["Source URL & Freshness Validation"]
+        Schema["Structured Dataset Store<br/>(PostgreSQL via Drizzle ORM)"]
+    end
+
+    subgraph Output ["5. Verified Delivery"]
+        Dashboard["Workspace Dashboard<br/>(Stat Cards & Verified Rows)"]
+        Export["Export Engine<br/>(CSV & JSON Downloads)"]
+        Speech["Spoken Spoken Results Feedback"]
+    end
+
+    Input --> LLM & Fallback
+    LLM --> Intent
+    Fallback --> Intent
+    Intent --> Remotive & Serp
+    Remotive & Serp --> Dedupe
+    Dedupe --> Verify
+    Verify --> Schema
+    Schema --> Dashboard & Export & Speech
 ```
 
-## How a query flows through ekam
+---
 
-```mermaid
-flowchart LR
-    Q[Ask bar<br>text or voice] --> I[Interpret<br>Gemini, with deterministic<br>regex fallback]
-    I --> F[Fetch<br>live sources for the vertical]
-    F --> V[Verify & rank<br>dedupe · source link · freshness]
-    V --> R[(Results<br>source-linked rows)]
-    R --> X[Export<br>CSV / JSON]
-```
+## Tech Stack
 
-1. **Landing page** - what ekam does, who it is for. Language (EN/HI), theme (light/dark) and a
-   unified **Get Started** button that opens the sign-in / sign-up overlay.
-2. **Onboarding** - one question: what will you use ekam for? Your answer shapes the workspace.
-3. **Workspace** - ask, watch the pipeline (interpret, fetch, verify), get verified,
-   source-linked results you can export.
+| Layer | Technology |
+|---|---|
+| **Framework** | [Next.js 16](https://nextjs.org) (App Router, Turbopack, React 19) |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com) + Custom Design Tokens |
+| **Database & ORM** | [PostgreSQL](https://www.postgresql.org/) via [Drizzle ORM](https://orm.drizzle.team/) |
+| **AI / Intent** | [Google Gemini API](https://ai.google.dev/) (`gemini-2.5-flash`) |
+| **Speech & Audio** | Web Speech API (SpeechRecognition + SpeechSynthesis) |
+| **Source Providers** | Remotive Verified API, Google Search SERP API |
 
-## Tech stack
+---
 
-- [Next.js](https://nextjs.org) (App Router) + React + TypeScript
-- [Tailwind CSS](https://tailwindcss.com)
-- [Drizzle ORM](https://orm.drizzle.team) + PostgreSQL
-- [Gemini](https://ai.google.dev) for query interpretation, with a deterministic regex fallback
-- Language and theme toggling built in (no i18n framework dependency)
+## Getting Started
 
-## Getting started
+### Prerequisites
+- Node.js 20+
+- PostgreSQL database
 
-Prerequisites: Node 20+, a PostgreSQL database.
-
+### 1. Clone & Install
 ```bash
 git clone https://github.com/sranswal/ekam.git
 cd ekam/app
 npm install
-cp .env.example .env   # or create .env with DATABASE_URL=postgres://user:pass@localhost:5432/app
-npx drizzle-kit push   # create the schema
+```
+
+### 2. Environment Variables
+Create a `.env` file in the `app/` directory:
+
+```env
+DATABASE_URL=postgres://user:password@localhost:5432/ekam
+GEMINI_API_KEY=your_gemini_api_key_here          # optional: fallback engine used if unset
+SERPAPI_API_KEY=your_serpapi_key_here            # optional: used for properties and tenders
+```
+
+### 3. Database Schema Push
+```bash
+npx drizzle-kit push
+```
+
+### 4. Run Development Server
+```bash
 npm run dev
 ```
 
-Open http://localhost:3000. Production:
-
-```bash
-npm run build
-npm start
-```
-
-## Configuration
-
-| Variable          | Required | Description                                                                                      |
-| ----------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`    | yes      | PostgreSQL connection string                                                                      |
-| `GEMINI_API_KEY`  | no       | Google Gemini API key, used for intent interpretation. Without it, a deterministic regex fallback is used |
-| `SERPAPI_API_KEY` | no       | SerpAPI key, used for some source fetches. Queries that need it return fewer rows without it        |
-
-## Project structure
-
-```
-app/
-  app/            # App Router pages: landing, onboarding, workspace
-  components/     # UI components (auth overlay, demo search, ...)
-  lib/            # brand, pipeline, query interpretation
-  db/             # Drizzle schema
-  drizzle/        # migrations
-  scripts/        # eval and utility scripts
-  evals/          # evaluation sets for query interpretation
-```
-
-## Roadmap
-
-- [x] Landing, auth overlay, onboarding, workspace
-- [x] Multi-vertical pipeline with verified, source-linked results
-- [x] English / Hindi, light / dark, CSV / JSON export, unique history
-- [x] Voice input to the ask bar
-- [ ] Conversational voice agent (Agora RTC)
-- [ ] More verticals: government schemes, public services
-- [ ] Saved searches and alerts
-- [ ] Source-trust scores per publisher, regional languages beyond Hindi
-
-## Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the short version: fork,
-branch from `main`, make your change, run `npm run build`, open a pull request.
-
-By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
-
-## License
-
-Released under the [MIT License](LICENSE).
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-<p align="center"><em>Built with <a href="https://ml.ai">ML.ai</a> at InfraShift · hackathon by <a href="https://infrasity.com">Infrasity</a> and <a href="https://geekroom.tech">Geek Room</a></em></p>
+## Testing
+
+Run the automated test suites:
+
+```bash
+# Run pipeline and query interpretation tests
+npm test
+
+# Run conversational voice agent tests
+npm run test:voice
+```
+
+---
+
+## Roadmap
+
+- [x] Search-first workspace with verified source links
+- [x] Multi-persona onboarding and profile customizer
+- [x] Conversational voice agent (bilingual continuous-turn audio loop)
+- [x] Voice dictation across persona profiles
+- [x] CSV and JSON dataset export
+- [x] Full English and Hindi bilingual interface
+- [ ] Source domain credibility and trust ratings
+- [ ] Regional languages: Tamil, Telugu, Kannada, Bengali
+- [ ] Saved search alerts and automated webhook triggers
+
+---
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+By participating, you agree to adhere to the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+---
+
+## License
+
+Distributed under the [MIT License](LICENSE).
+
+<p align="center">
+  <em>Built for InfraShift · Hackathon by <a href="https://infrasity.com">Infrasity</a> and <a href="https://geekroom.tech">Geek Room</a></em>
+</p>

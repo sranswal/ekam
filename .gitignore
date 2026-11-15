@@ -8,3 +8,9 @@ node_modules/
 app/evals/report.json
 decks/
 exports/
+*.ppt
+*.pptx
+*.deck.json
+PLAN.md
+*AGENTS.md
+.gemini/

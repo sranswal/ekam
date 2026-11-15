@@ -326,22 +326,39 @@ export default function LandingPage() {
         </section>
 
         {/* Demo video */}
-        <section className="mx-auto w-full max-w-5xl px-5 py-16">
+        <section id="demo" className="mx-auto w-full max-w-5xl scroll-mt-20 px-5 py-20">
           <p className="mono text-center text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-            {t("Demo", "डेमो")}
+            {t("Product Walkthrough", "प्रोडक्ट वॉकथ्रू")}
           </p>
-          <h2 className="display mt-3 text-center text-2xl sm:text-3xl">
+          <h2 className="display mt-3 text-center text-2xl sm:text-4xl">
             {t("See ekam in action.", "देखिए ekam कैसे काम करता है।")}
           </h2>
+          <p className="mx-auto mt-2 max-w-lg text-center text-sm text-[var(--muted)]">
+            {t(
+              "A real query, end to end: asked in plain words, searched across live sources, verified and exported.",
+              "एक असली सवाल, शुरू से अंत तक: साधारण शब्दों में पूछा, लाइव स्रोतों से खोजा, जाँचा और एक्सपोर्ट किया।"
+            )}
+          </p>
+
           <div
-            className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-2xl border border-[var(--border)]"
-            style={{ boxShadow: "var(--shadow-2)" }}
+            className="relative mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-2)]"
           >
+            {/* Window header */}
+            <div className="flex h-10 items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-4">
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                <span className="size-3 rounded-full bg-[#ff5f56]" />
+                <span className="size-3 rounded-full bg-[#ffbd2e]" />
+                <span className="size-3 rounded-full bg-[#27c93f]" />
+              </div>
+              <span className="mono text-[11px] text-[var(--muted)] font-medium">ekam.app · workspace demo</span>
+              <div className="w-12" aria-hidden="true" />
+            </div>
+
             <video
               controls
               preload="metadata"
-              poster="/ekam_logo.png"
-              className="block w-full bg-black"
+              poster="/demo-poster.png"
+              className="block w-full bg-black aspect-video object-contain"
               aria-label={t(
                 "ekam product demo video",
                 "ekam प्रोडक्ट डेमो वीडियो",
@@ -354,12 +371,6 @@ export default function LandingPage() {
               )}
             </video>
           </div>
-          <p className="mt-3 text-center text-xs text-[var(--muted)]">
-            {t(
-              "A real query, end to end — asked, searched, verified and exported.",
-              "एक असली सवाल, शुरू से अंत तक — पूछा, खोजा, जाँचा और एक्सपोर्ट किया।",
-            )}
-          </p>
         </section>
       </main>
 
